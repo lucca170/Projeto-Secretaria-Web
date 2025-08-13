@@ -2,14 +2,10 @@ from django.urls import path
 from .views import (
     lista_salas, detalhe_sala,
     lista_alunos, lista_disciplinas, lista_notas, lista_eventos,
-    lista_materiais, lista_emprestimos, lista_mensalidades, lista_colaboradores,
-    boletim_aluno, lista_alunos_para_boletim
+    lista_materiais, lista_emprestimos, lista_mensalidades, lista_colaboradores
 )
 
 urlpatterns = [
-    # ... outras urls
-    path('boletim/', lista_alunos_para_boletim, name='lista_alunos_para_boletim'),
-    path('boletim/<int:aluno_id>/', boletim_aluno, name='boletim_aluno'),
     path('salas/', lista_salas, name='lista_salas'),
     path('salas/<int:sala_id>/', detalhe_sala, name='detalhe_sala'),
     path('alunos/', lista_alunos, name='lista_alunos'),

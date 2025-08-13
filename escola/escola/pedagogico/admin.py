@@ -1,13 +1,5 @@
 from django.contrib import admin
-# Adicione Turma à lista de importações
-from .models import Turma, Aluno, Disciplina, Nota, Falta, EmprestimoMaterial, EventoExtracurricular
-
-# Adicione este novo bloco para registrar a Turma
-@admin.register(Turma)
-class TurmaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'turno')
-    search_fields = ('nome',)
-    list_filter = ('turno',)
+from .models import Aluno, Disciplina, Nota, Falta, EmprestimoMaterial, EventoExtracurricular # <-- ADICIONADOS AQUI
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
@@ -32,6 +24,7 @@ class FaltaAdmin(admin.ModelAdmin):
     search_fields = ('aluno__nome', 'disciplina__nome')
     list_filter = ('data', 'justificada')
 
+# BLOCOS DE CÓDIGO MOVIDOS PARA CÁ
 @admin.register(EmprestimoMaterial)
 class EmprestimoMaterialAdmin(admin.ModelAdmin):
     list_display = ('material', 'aluno', 'data_emprestimo', 'data_devolucao')
