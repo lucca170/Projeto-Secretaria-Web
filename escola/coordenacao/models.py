@@ -64,15 +64,6 @@ class MaterialDidatico(models.Model):
     def __str__(self):
         return self.nome
 
-class EmprestimoMaterial(models.Model):
-    material = models.ForeignKey(MaterialDidatico, on_delete=models.CASCADE)
-    aluno = models.ForeignKey('pedagogico.Aluno', on_delete=models.CASCADE, null=True, blank=True)
-    data_emprestimo = models.DateField()
-    data_devolucao = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.material.nome} - {self.data_emprestimo}"
-
 class SalaLaboratorio(models.Model):
     nome = models.CharField(max_length=50)
     tipo = models.CharField(max_length=50)
@@ -89,17 +80,6 @@ class ReservaSala(models.Model):
 
     def __str__(self):
         return f"{self.sala.nome} - {self.data_inicio}"
-
-# --- Eventos e Atividades Extracurriculares ---
-class EventoExtracurricular(models.Model):
-    nome = models.CharField(max_length=100)
-    descricao = models.TextField(blank=True)
-    data = models.DateField()
-    vagas = models.PositiveIntegerField()
-    participantes = models.ManyToManyField('pedagogico.Aluno', blank=True)
-
-    def __str__(self):
-        return self.nome
 
 # --- Relatórios e Análise Gerencial ---
 class RelatorioGerencial(models.Model):

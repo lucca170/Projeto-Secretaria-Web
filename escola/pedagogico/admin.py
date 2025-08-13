@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Aluno, Disciplina, Nota, Falta
+from .models import Aluno, Disciplina, Nota, Falta, EmprestimoMaterial, EventoExtracurricular # <-- ADICIONADOS AQUI
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
@@ -23,3 +23,16 @@ class FaltaAdmin(admin.ModelAdmin):
     list_display = ('aluno', 'disciplina', 'data', 'justificada')
     search_fields = ('aluno__nome', 'disciplina__nome')
     list_filter = ('data', 'justificada')
+
+# BLOCOS DE CÓDIGO MOVIDOS PARA CÁ
+@admin.register(EmprestimoMaterial)
+class EmprestimoMaterialAdmin(admin.ModelAdmin):
+    list_display = ('material', 'aluno', 'data_emprestimo', 'data_devolucao')
+    search_fields = ('material__nome', 'aluno__nome')
+    list_filter = ('data_emprestimo', 'data_devolucao')
+
+@admin.register(EventoExtracurricular)
+class EventoExtracurricularAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'data', 'vagas')
+    search_fields = ('nome',)
+    list_filter = ('data',)

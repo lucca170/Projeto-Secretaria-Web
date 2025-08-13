@@ -1,4 +1,3 @@
-# Crie este arquivo se não existir para registrar os modelos do app coordenacao no admin.
 
 from django.contrib import admin
 from .models import (
@@ -6,10 +5,10 @@ from .models import (
     Notificacao,
     EventoCalendario,
     MaterialDidatico,
-    EmprestimoMaterial,
+    # EmprestimoMaterial,  <-- REMOVIDO
     SalaLaboratorio,
     ReservaSala,
-    EventoExtracurricular,
+    # EventoExtracurricular, <-- REMOVIDO
     RelatorioGerencial,
     Colaborador,
 )
@@ -38,17 +37,6 @@ class MaterialDidaticoAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'tipo')
     list_filter = ('disponivel',)
 
-@admin.register(EmprestimoMaterial)
-class EmprestimoMaterialAdmin(admin.ModelAdmin):
-    list_display = ('material', 'aluno', 'data_emprestimo', 'data_devolucao')
-    search_fields = ('material__nome', 'aluno__nome')
-    list_filter = ('data_emprestimo', 'data_devolucao')
-    fieldsets = (
-        ('Empréstimo de material', {
-            'fields': ('material', 'aluno', 'data_emprestimo', 'data_devolucao')
-        }),
-    )
-
 @admin.register(SalaLaboratorio)
 class SalaLaboratorioAdmin(admin.ModelAdmin):
     list_display = ('nome', 'tipo', 'capacidade')
@@ -59,12 +47,6 @@ class ReservaSalaAdmin(admin.ModelAdmin):
     list_display = ('sala', 'usuario', 'data_inicio', 'data_fim')
     search_fields = ('sala__nome', 'usuario')
     list_filter = ('data_inicio', 'data_fim')
-
-@admin.register(EventoExtracurricular)
-class EventoExtracurricularAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'data', 'vagas')
-    search_fields = ('nome',)
-    list_filter = ('data',)
 
 @admin.register(RelatorioGerencial)
 class RelatorioGerencialAdmin(admin.ModelAdmin):

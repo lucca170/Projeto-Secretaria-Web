@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+from coordenacao.models import MaterialDidatico
 class Turma(models.Model):
     TURNO_CHOICES = (
         ('manha', 'Manhã'),
@@ -56,3 +57,22 @@ class Presenca(models.Model):
     data = models.DateField()
     def __str__(self):
         return f"{self.aluno} - {self.data}"
+
+class EmprestimoMaterial(models.Model):
+    material = models.ForeignKey(MaterialDidatico, on_delete=models.CASCADE)
+    aluno = models.ForeignKey('pedagogico.Aluno', on_delete=models.CASCADE, null=True, blank=True)
+    data_emprestimo = models.DateField()
+    data_devolucao = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.material.nome} - {self.data_emprestimo}"
+ 
+class EventoExtracurricular(models.Model):
+    nome = models.CharField(max_length=100)
+    descricao = models.TextField(blank=True)
+    data = models.DateField()
+    vagas = models.PositiveIntegerField()
+    participantes = models.ManyToManyField('pedagogico.Aluno', blank=True)
+
+    def __str__(self):
+        return self.nome
