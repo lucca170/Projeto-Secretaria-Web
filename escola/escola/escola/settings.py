@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 """
 Django settings for escola project.
 
@@ -131,6 +130,3 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-=======
-from django.contrib import admin
->>>>>>> 495c6b4ac8b2736a32c41d3789da7db7ee73063f

@@ -42,24 +42,3 @@ def lista_mensalidades(request):
 def lista_colaboradores(request):
     colaboradores = Colaborador.objects.all()
     return render(request, 'base/lista_colaboradores.html', {'colaboradores': colaboradores})
-
-def boletim_aluno(request, aluno_id):
-    aluno = get_object_or_404(Aluno, id=aluno_id)
-    notas = Nota.objects.filter(aluno=aluno).select_related('disciplina')
-    
-    disciplinas = {}
-    for nota in notas:
-        if nota.disciplina.nome not in disciplinas:
-            disciplinas[nota.disciplina.nome] = []
-        disciplinas[nota.disciplina.nome].append(nota.valor)
-        
-    boletim = {
-        'aluno': aluno,
-        'disciplinas': disciplinas
-    }
-    
-    return render(request, 'base/boletim_aluno.html', {'boletim': boletim})
-
-def lista_alunos_para_boletim(request):
-    alunos = Aluno.objects.all()
-    return render(request, 'base/lista_alunos_para_boletim.html', {'alunos': alunos})
