@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
+from escola.coordenacao.models import MaterialDidatico
 
-from coordenacao.models import MaterialDidatico
 class Turma(models.Model):
     TURNO_CHOICES = (
         ('manha', 'Manhã'),

@@ -1,13 +1,16 @@
 from django.contrib import admin
+# Modelos que pertencem à app 'base'
 from .models import (
-    Colaborador,
-    EventoCalendario, Notificacao,
-    MaterialDidatico, EmprestimoMaterial, SalaLaboratorio, ReservaSala,
-    EventoExtracurricular
+    Colaborador, EventoCalendario, Notificacao,
+    MaterialDidatico, SalaLaboratorio, ReservaSala
 )
-from pedagogico.models import Aluno, Disciplina, Nota, Falta
-from disciplinar.models import Advertencia, Suspensao
-from financeiro.models import Mensalidade
+# Modelos importados de outras apps
+from escola.pedagogico.models import (
+    Aluno, Disciplina, Nota, Falta,
+    EmprestimoMaterial, EventoExtracurricular  # Corrigido
+)
+from escola.disciplinar.models import Advertencia, Suspensao
+from escola.financeiro.models import Mensalidade
 
 # --- Gestão Acadêmica ---
 @admin.register(Aluno)

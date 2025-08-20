@@ -39,15 +39,6 @@ class MaterialDidatico(models.Model):
     def __str__(self):
         return self.nome
 
-class EmprestimoMaterial(models.Model):
-    material = models.ForeignKey(MaterialDidatico, on_delete=models.CASCADE)
-    aluno = models.ForeignKey('pedagogico.Aluno', on_delete=models.CASCADE, null=True, blank=True)
-    data_emprestimo = models.DateField()
-    data_devolucao = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.material.nome} - {self.data_emprestimo}"
-
 class SalaLaboratorio(models.Model):
     nome = models.CharField(max_length=50)
     tipo = models.CharField(max_length=50)
@@ -65,17 +56,6 @@ class ReservaSala(models.Model):
     def __str__(self):
         return f"{self.sala.nome} - {self.data_inicio}"
 
-# --- Eventos e Atividades Extracurriculares ---
-class EventoExtracurricular(models.Model):
-    nome = models.CharField(max_length=100)
-    descricao = models.TextField(blank=True)
-    data = models.DateField()
-    vagas = models.PositiveIntegerField()
-    participantes = models.ManyToManyField('pedagogico.Aluno', blank=True)
-
-    def __str__(self):
-        return self.nome
-
 # --- Relatórios e Análise Gerencial ---
 class RelatorioGerencial(models.Model):
     titulo = models.CharField(max_length=100)
@@ -92,32 +72,4 @@ class Colaborador(models.Model):
     cargo = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.nome
-class EventoExtracurricular(models.Model):
-    nome = models.CharField(max_length=100)
-    descricao = models.TextField(blank=True)
-    data = models.DateField()
-    vagas = models.PositiveIntegerField()
-    participantes = models.ManyToManyField('pedagogico.Aluno', blank=True)
-
-    def __str__(self):
-        return self.nome
-
-# --- Relatórios e Análise Gerencial ---
-class RelatorioGerencial(models.Model):
-    titulo = models.CharField(max_length=100)
-    data_geracao = models.DateTimeField(auto_now_add=True)
-    tipo = models.CharField(max_length=50)
-    arquivo = models.FileField(upload_to='relatorios/')
-
-    def __str__(self):
-        return self.titulo
-
-class Colaborador(models.Model):
-    nome = models.CharField(max_length=100)
-    cpf = models.CharField(max_length=14, unique=True)
-    cargo = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.nome
         return self.nome
