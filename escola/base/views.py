@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404
-from .models import EventoCalendario, MaterialDidatico, EmprestimoMaterial, Colaborador, SalaLaboratorio
-from pedagogico.models import Aluno, Disciplina, Nota
-from financeiro.models import Mensalidade
+# Modelos da app 'base'
+from .models import EventoCalendario, MaterialDidatico, Colaborador, SalaLaboratorio
+# Modelos de outras apps
+from escola.pedagogico.models import Aluno, Disciplina, Nota, EmprestimoMaterial
+from escola.financeiro.models import Mensalidade
 
 def lista_salas(request):
     salas = SalaLaboratorio.objects.all()

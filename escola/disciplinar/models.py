@@ -1,5 +1,5 @@
 from django.db import models
-from pedagogico.models import Aluno
+from escola.pedagogico.models import Aluno
 
 class Advertencia(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)
