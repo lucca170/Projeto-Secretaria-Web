@@ -9,6 +9,12 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Inclui as URLs da sua aplicação 'base'
     path('', include('escola.base.urls')),
 ]
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('escola.base.urls')),
+    path('pedagogico/', include('escola.pedagogico.urls')),]
