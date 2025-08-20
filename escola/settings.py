@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Suas aplicações 
-    'escola.base',
     'escola.coordenacao',
     'escola.disciplinar',
     'escola.financeiro',

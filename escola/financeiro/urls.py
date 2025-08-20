@@ -1,6 +1,6 @@
 from django.urls import path
+from .views import lista_mensalidades
 
 urlpatterns = [
-    # Adicione suas views aqui, por exemplo:
-    # path('', sua_view, name='financeiro_home'),
+    path('mensalidades/', lista_mensalidades, name='lista_mensalidades'),
 ]
