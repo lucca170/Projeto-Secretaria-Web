@@ -2,37 +2,33 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Alunos</title>
+    <title>Turmas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-4">
-        <h1>Alunos</h1>
-        <a href="{% url 'adicionar_turma' %}" class="btn btn-primary mb-3">Adicionar Turma</a>
+        <h1>Turmas</h1>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Nome</th>
-                    <th>Matrícula</th>
-                    <th>Turma</th>
-                    <th>Responsável</th>
+                    <th>Turno</th>
                 </tr>
             </thead>
             <tbody>
-                {% for aluno in alunos %}
+                {% for turma in turmas %}
                 <tr>
-                    <td>{{ aluno.nome }}</td>
-                    <td>{{ aluno.matricula }}</td>
-                    <td>{{ aluno.turma }}</td>
-                    <td>{{ aluno.responsavel }}</td>
+                    <td>{{ turma.nome }}</td>
+                    <td>{{ turma.get_turno_display }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4">Nenhum aluno cadastrado.</td>
+                    <td colspan="2">Nenhuma turma cadastrada.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <a href="{% url 'adicionar_turma' %}" class="btn btn-primary">Adicionar Turma</a>
         <a href="/" class="btn btn-secondary">Voltar</a>
     </div>
 </body>

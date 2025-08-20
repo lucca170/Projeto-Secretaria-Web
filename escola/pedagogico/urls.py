@@ -1,9 +1,7 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from .views import adicionar_turma, lista_turmas
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    # Adicione os URLs das suas outras aplicações aqui
-    path('', include('base.urls')), 
-    # Exemplo: path('pedagogico/', include('pedagogico.urls')),
+    path('turmas/', lista_turmas, name='lista_turmas'),
+    path('turmas/adicionar/', adicionar_turma, name='adicionar_turma'),
 ]
