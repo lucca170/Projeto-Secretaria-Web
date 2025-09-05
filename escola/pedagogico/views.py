@@ -1,6 +1,5 @@
-# escola/pedagogico/views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import TurmaForm
+from .forms import TurmaForm, AlunoForm
 from .models import Turma, Aluno, Disciplina, Nota, EmprestimoMaterial
 
 def adicionar_turma(request):
@@ -12,6 +11,16 @@ def adicionar_turma(request):
     else:
         form = TurmaForm()
     return render(request, 'pedagogico/adicionar_turma.html', {'form': form})
+
+def adicionar_aluno(request):
+    if request.method == 'POST':
+        form = AlunoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_alunos')
+    else:
+        form = AlunoForm()
+    return render(request, 'pedagogico/adicionar_aluno.html', {'form': form})
 
 def lista_turmas(request):
     turmas = Turma.objects.all()
