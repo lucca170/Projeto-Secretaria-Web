@@ -86,3 +86,47 @@ def boletim_aluno(request, aluno_id):
 def lista_alunos_para_boletim(request):
     alunos = Aluno.objects.all()
     return render(request, 'base/lista_alunos_para_boletim.html', {'alunos': alunos})
+
+def boletim_aluno(request, aluno_id):
+    aluno = get_object_or_404(Aluno, id=aluno_id)
+    notas = Nota.objects.filter(aluno=aluno)
+    disciplinas = Disciplina.objects.all()
+
+    # Estrutura de dados para o boletim
+    boletim = {}
+    for disciplina in disciplinas:
+        boletim[disciplina.nome] = {
+            'notas': [],
+            'comentarios': []
+        }
+
+    for nota in notas:
+        if nota.disciplina.nome in boletim:
+            boletim[nota.disciplina.nome]['notas'].append(nota.nota)
+            if nota.comentario:
+                boletim[nota.disciplina.nome]['comentarios'].append(nota.comentario)
+
+    # Dados para o gráfico
+    notas_por_disciplina = []
+    for disciplina, dados in boletim.items():
+        if dados['notas']:
+            media = sum(dados['notas']) / len(dados['notas'])
+            notas_por_disciplina.append(float(media))
+        else:
+            notas_por_disciplina.append(0)
+
+    chart_data = {
+        'labels': [disciplina.nome for disciplina in disciplinas],
+        'data': notas_por_disciplina,
+    }
+
+    context = {
+        'aluno': aluno,
+        'boletim': boletim,
+        'chart_data_json': json.dumps(chart_data)
+    }
+    return render(request, 'base/boletim_aluno.html', context)
+
+def lista_alunos_para_boletim(request):
+    alunos = Aluno.objects.all()
+    return render(request, 'base/lista_alunos_para_boletim.html', {'alunos': alunos})

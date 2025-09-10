@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import (
     lista_salas, detalhe_sala,
     lista_alunos, lista_disciplinas, lista_notas, lista_eventos,
@@ -7,6 +8,8 @@ from .views import (
 )
 
 urlpatterns = [
+    path('boletim/aluno/<int:aluno_id>/', views.boletim_aluno, name='boletim_aluno'),
+    path('boletim/alunos/', views.lista_alunos_para_boletim, name='lista_alunos_para_boletim'),
     path('registrar/', RegistrarUsuarioView.as_view(), name='registrar'),
     path('boletim/', lista_alunos_para_boletim, name='lista_alunos_para_boletim'),
     path('boletim/<int:aluno_id>/', boletim_aluno, name='boletim_aluno'),
