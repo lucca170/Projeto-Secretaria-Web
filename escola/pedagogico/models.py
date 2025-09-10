@@ -17,7 +17,6 @@ class Disciplina(models.Model):
     professor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        limit_choices_to={'tipo': 'professor'},
         related_name='disciplinas'
     )
     nome = models.CharField(max_length=100)
@@ -29,7 +28,6 @@ class Aluno(models.Model):
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        limit_choices_to={'tipo': 'aluno'},
         related_name='aluno_profile'
     )
     turma = models.ForeignKey(Turma, on_delete=models.CASCADE, related_name='alunos')
