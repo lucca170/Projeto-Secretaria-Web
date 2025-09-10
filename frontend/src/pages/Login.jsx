@@ -13,7 +13,8 @@ const Login = () => {
     setError(''); // Limpa erros anteriores
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/coordenacao/api-token-auth/', {
+      // A URL da API para autenticação
+      const response = await fetch('http://127.0.0.1:8000/api-token-auth/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,11 +25,10 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token); // Salva o token
-        navigate('/dashboard');
+        navigate('/dashboard'); // Redireciona para o painel principal
       } else {
         const errorData = await response.json();
-        // A mensagem de erro pode variar dependendo da resposta da sua API
-        setError(errorData.non_field_errors[0] || 'Falha no login. Verifique suas credenciais.');
+        setError(errorData.non_field_errors?.[0] || 'Falha no login. Verifique suas credenciais.');
       }
     } catch (err) {
       setError('Erro ao conectar com o servidor. Tente novamente mais tarde.');
@@ -63,11 +63,11 @@ const Login = () => {
           {error && <p className="error-message">{error}</p>}
           <button type="submit" className="login-button">Entrar</button>
         </form>
-        {/* O link aponta para a URL de registro do Django */}
-        <p>Não tem uma conta? <a href="http://127.0.0.1:8000/registrar/">Registre-se</a></p>
+        {/* O link de registro foi removido desta seção */}
       </div>
     </div>
   );
 };
 
 export default Login;
+

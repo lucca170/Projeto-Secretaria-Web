@@ -1,18 +1,30 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
-from .forms import UsuarioCreationForm
+# Importa as classes de permissão do Django
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+from .forms import UsuarioCreationForm
 # Modelos da app 'base'
 from .models import EventoCalendario, MaterialDidatico, Colaborador, SalaLaboratorio
 # Modelos de outras apps
 from escola.pedagogico.models import Aluno, Disciplina, Nota, EmprestimoMaterial
 from escola.financeiro.models import Mensalidade
 
-class RegistrarUsuarioView(generic.CreateView):
+# --- ATUALIZAÇÃO IMPORTANTE AQUI ---
+# Adicionamos as classes LoginRequiredMixin e UserPassesTestMixin
+class RegistrarUsuarioView(LoginRequiredMixin, UserPassesTestMixin, generic.CreateView):
     form_class = UsuarioCreationForm
-    success_url = reverse_lazy('login')
-    template_name = 'base/registrar.html'
+    # Após criar um usuário, redireciona para a página inicial do admin
+    success_url = reverse_lazy('admin:index')
+    template_name = 'base/templates/base/registrar.html'
+
+    def test_func(self):
+        # Esta função define a regra de acesso:
+        # Apenas usuários marcados como "staff" (TI) podem acessar.
+        return self.request.user.is_staff
+
+# --- O RESTANTE DO ARQUIVO CONTINUA IGUAL ---
 
 def lista_salas(request):
     salas = SalaLaboratorio.objects.all()
