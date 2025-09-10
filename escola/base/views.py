@@ -1,9 +1,18 @@
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse_lazy
+from django.views import generic
+from .forms import UsuarioCreationForm
+
 # Modelos da app 'base'
 from .models import EventoCalendario, MaterialDidatico, Colaborador, SalaLaboratorio
 # Modelos de outras apps
 from escola.pedagogico.models import Aluno, Disciplina, Nota, EmprestimoMaterial
 from escola.financeiro.models import Mensalidade
+
+class RegistrarUsuarioView(generic.CreateView):
+    form_class = UsuarioCreationForm
+    success_url = reverse_lazy('login')
+    template_name = 'base/registrar.html'
 
 def lista_salas(request):
     salas = SalaLaboratorio.objects.all()

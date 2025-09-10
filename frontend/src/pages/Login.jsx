@@ -63,6 +63,8 @@ const Login = () => {
           {error && <p className="error-message">{error}</p>}
           <button type="submit" className="login-button">Entrar</button>
         </form>
+        {/* O link aponta para a URL de registro do Django */}
+        <p>Não tem uma conta? <a href="http://127.0.0.1:8000/registrar/">Registre-se</a></p>
       </div>
     </div>
   );

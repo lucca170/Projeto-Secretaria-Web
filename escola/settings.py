@@ -44,16 +44,19 @@ DATABASES = {
 
 STATIC_URL = 'static/'
 
+# --- CONFIGURAÇÃO FINAL E CORRETA DOS TEMPLATES ---
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        # Diz ao Django para procurar na pasta "templates" na raiz do projeto
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        # Diz ao Django para procurar na pasta "templates" de cada app
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth', # <-- ADICIONE ESTA LINHA
+                'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -71,10 +74,11 @@ INSTALLED_APPS = [
 
     # Apps de terceiros
     'rest_framework',
-    'rest_framework.authtoken', # Adicione esta linha para tokens
-    'corsheaders',            # Adicione esta linha
+    'rest_framework.authtoken',
+    'corsheaders',
 
     # Suas aplicações
+    'escola.base',
     'escola.coordenacao',
     'escola.disciplinar',
     'escola.financeiro',
@@ -100,6 +104,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-
-    
 }
+
+AUTH_USER_MODEL = 'base.Usuario'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

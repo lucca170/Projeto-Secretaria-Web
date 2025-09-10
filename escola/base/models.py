@@ -1,6 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group, Permission, AbstractUser
 from django.conf import settings
+
+# --- Modelo de Usuário Personalizado ---
+class Usuario(AbstractUser):
+    CARGO_CHOICES = (
+        ('aluno', 'Aluno'),
+        ('professor', 'Professor'),
+        ('coordenacao', 'Coordenação'),
+        ('secretaria', 'Secretaria'),
+    )
+    cargo = models.CharField(max_length=20, choices=CARGO_CHOICES)
 
 # --- Notificações, Eventos e Materiais ---
 class Notificacao(models.Model):
