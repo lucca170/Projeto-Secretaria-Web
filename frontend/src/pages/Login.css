@@ -1,60 +1,90 @@
-.login-container {
+.login-page {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #eef1f5;
+  background: linear-gradient(135deg, #6dd5ed, #2193b0);
 }
 
-.login-box {
+.login-container {
   background: white;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem 3rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
-.login-box h2 {
-  margin-bottom: 20px;
-  color: #333;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.input-group {
-  margin-bottom: 15px;
+.login-header h1 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+
+.login-header p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.login-form .input-group {
+  margin-bottom: 1.5rem;
   text-align: left;
 }
 
 .input-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
   color: #555;
+  font-weight: 500;
 }
 
 .input-group input {
   width: 100%;
-  padding: 10px;
+  padding: 0.8rem 1rem;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 .login-button {
   width: 100%;
-  padding: 10px;
-  background-color: #007bff;
+  padding: 0.9rem;
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .login-button:hover {
-  background-color: #0056b3;
+  background-color: #357ABD;
+  transform: translateY(-2px);
 }
 
 .error-message {
-  color: red;
-  margin-bottom: 15px;
+  color: var(--error-color);
+  margin-bottom: 1rem;
+  text-align: center;
 }

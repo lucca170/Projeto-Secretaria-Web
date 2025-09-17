@@ -10,10 +10,9 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Limpa erros anteriores
+    setError('');
 
     try {
-      // A URL da API para autenticação
       const response = await fetch('http://127.0.0.1:8000/api-token-auth/', {
         method: 'POST',
         headers: {
@@ -24,8 +23,8 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('token', data.token); // Salva o token
-        navigate('/dashboard'); // Redireciona para o painel principal
+        localStorage.setItem('token', data.token);
+        navigate('/dashboard');
       } else {
         const errorData = await response.json();
         setError(errorData.non_field_errors?.[0] || 'Falha no login. Verifique suas credenciais.');
@@ -36,10 +35,13 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>Login</h2>
-        <form onSubmit={handleLogin}>
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-header">
+          <h1>Bem-vindo!</h1>
+          <p>Faça login para acessar o painel da secretaria.</p>
+        </div>
+        <form onSubmit={handleLogin} className="login-form">
           <div className="input-group">
             <label htmlFor="username">Usuário</label>
             <input
@@ -48,6 +50,7 @@ const Login = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              placeholder="Digite seu usuário"
             />
           </div>
           <div className="input-group">
@@ -58,16 +61,15 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder="Digite sua senha"
             />
           </div>
           {error && <p className="error-message">{error}</p>}
           <button type="submit" className="login-button">Entrar</button>
         </form>
-        {/* O link de registro foi removido desta seção */}
       </div>
     </div>
   );
 };
 
 export default Login;
-

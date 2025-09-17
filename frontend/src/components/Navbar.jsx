@@ -1,38 +1,38 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <Link to="/dashboard" className="navbar-logo">
-          Secretaria Escolar
-        </Link>
+    <header className="header">
+      <nav className="navbar">
+        <NavLink to="/dashboard" className="navbar-logo">
+          Secretaria Web
+        </NavLink>
         <ul className="nav-menu">
           <li className="nav-item">
-            <Link to="/alunos" className="nav-links">
+            <NavLink to="/alunos" className="nav-links" activeClassName="active">
               Alunos
-            </Link>
+            </NavLink>
           </li>
           <li className="nav-item">
-            <Link to="/turmas" className="nav-links">
+            <NavLink to="/turmas" className="nav-links" activeClassName="active">
               Turmas
-            </Link>
+            </NavLink>
           </li>
           <li className="nav-item">
-            <Link to="/disciplinas" className="nav-links">
+            <NavLink to="/disciplinas" className="nav-links" activeClassName="active">
               Disciplinas
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/logout" className="nav-links-logout">
-              Sair
-            </Link>
+            </NavLink>
           </li>
         </ul>
-      </div>
-    </nav>
+        <div className="nav-logout">
+            <NavLink to="/logout" className="logout-button">
+              Sair
+            </NavLink>
+        </div>
+      </nav>
+    </header>
   );
 };
 

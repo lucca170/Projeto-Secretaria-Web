@@ -1,34 +1,31 @@
-.navbar {
-  background-color: #343a40;
-  height: 80px;
+.header {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.2rem;
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 1000;
+  width: 100%;
 }
 
-.navbar-container {
+.navbar {
   display: flex;
   justify-content: space-between;
-  height: 80px;
-  z-index: 1;
+  align-items: center;
+  height: 100%;
   width: 100%;
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 0 50px;
+  max-width: 1200px;
+  padding: 0 2rem;
 }
 
 .navbar-logo {
-  color: #fff;
-  justify-self: start;
-  cursor: pointer;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 700;
   text-decoration: none;
-  font-size: 2rem;
-  display: flex;
-  align-items: center;
 }
 
 .nav-menu {
@@ -36,41 +33,59 @@
   align-items: center;
   list-style: none;
   text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-item {
-  height: 80px;
+  height: 70px;
 }
 
 .nav-links {
-  color: #fff;
+  color: #555;
   display: flex;
   align-items: center;
   text-decoration: none;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
   height: 100%;
   cursor: pointer;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s;
 }
 
-.nav-links:hover {
-  border-bottom: 4px solid #fff;
-  transition: all 0.2s ease-out;
+.nav-links::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+  transform: scaleX(0);
+  transition: transform 0.3s ease-in-out;
 }
 
-.nav-links-logout {
-  color: #fff;
-  display: flex;
-  align-items: center;
+.nav-links:hover,
+.nav-links.active {
+  color: var(--primary-color);
+}
+
+.nav-links.active::after,
+.nav-links:hover::after {
+  transform: scaleX(1);
+}
+
+.logout-button {
+  color: var(--primary-color);
   text-decoration: none;
-  padding: 8px 16px;
-  height: auto;
-  cursor: pointer;
-  background-color: #dc3545;
-  border-radius: 5px;
-  margin-left: 10px;
-  transition: background-color 0.3s;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s, color 0.3s;
 }
 
-.nav-links-logout:hover {
-    background-color: #c82333;
+.logout-button:hover {
+  background-color: var(--primary-color);
+  color: #fff;
 }
