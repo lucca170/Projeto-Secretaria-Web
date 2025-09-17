@@ -1,17 +1,24 @@
 from django.db import models
-from django.contrib.auth.models import Group, Permission, AbstractUser
+from django.contrib.auth.models import AbstractUser  # já importado
 from django.conf import settings
 
 # --- Modelo de Usuário Personalizado ---
-class Usuario(AbstractUser):
-    CARGO_CHOICES = (
-        ('Ti, Tecnologia da Informação'),
-        ('aluno', 'Aluno'),
-        ('professor', 'Professor'),
-        ('coordenacao', 'Coordenação'),
-        ('secretaria', 'Secretaria'),
-    )
-    cargo = models.CharField(max_length=20, choices=CARGO_CHOICES, default='Aluno')
+CARGO_CHOICES = [
+    ('professor', 'Professor'),
+    ('aluno', 'Aluno'),
+    ('administrador', 'Administrador'),
+    # ...adicione outros cargos se necessário...
+]
+
+class Usuario(AbstractUser):  # Altere para herdar de AbstractUser
+    cargo = models.CharField(max_length=50, choices=CARGO_CHOICES)
+    # Os campos username, first_name, last_name, email, password, is_active, is_staff, date_joined já existem em AbstractUser
+    # Não é necessário redefini-los, apenas adicione campos extras como 'cargo'
+
+    def __str__(self):
+        return self.username
+
+    # USERNAME_FIELD e REQUIRED_FIELDS já são definidos corretamente em AbstractUser
 
 # --- Notificações, Eventos e Materiais ---
 class Notificacao(models.Model):
@@ -109,4 +116,10 @@ class Nota(models.Model):
     comentario = models.TextField(blank=True, null=True) # Campo para comentários do professor
 
     def __str__(self):
-        return self.user.username
+        return f"{self.aluno} - {self.disciplina} - {self.nota}"
+    nota = models.DecimalField(max_digits=5, decimal_places=2)
+    bimestre = models.CharField(max_length=20) # Ex: "1º Bimestre", "2º Bimestre"
+    comentario = models.TextField(blank=True, null=True) # Campo para comentários do professor
+
+    def __str__(self):
+        return f"{self.aluno} - {self.disciplina} - {self.nota}"
