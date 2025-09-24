@@ -1,86 +1,56 @@
-.login-page {
+.login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: var(--background-primary);
+  padding-top: 5rem;
 }
 
-.login-container {
-  background: var(--background-secondary);
-  padding: 2.5rem 3rem;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
+.login-card {
   width: 100%;
   max-width: 400px;
+  padding: 2rem;
+}
+
+.login-card h2 {
   text-align: center;
-  border: 1px solid var(--border-color);
-}
-
-.login-header h1 {
-  color: var(--text-primary);
+  margin-top: 0;
   margin-bottom: 0.5rem;
-  font-size: 1.75rem;
-  font-weight: 700;
 }
 
-.login-header p {
-  color: var(--text-secondary);
+.login-card p {
+  text-align: center;
   margin-bottom: 2rem;
+  color: var(--cor-texto-secundario);
 }
 
-.login-form .input-group {
+.form-group {
   margin-bottom: 1.5rem;
-  text-align: left;
 }
 
-.input-group label {
+.form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--text-secondary);
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
-.input-group input {
+.form-group input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  box-sizing: border-box;
-  background-color: var(--background-primary);
-  color: var(--text-primary);
-}
-
-.input-group input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
-}
-
-.login-button {
-  width: 100%;
-  padding: 0.85rem;
-  margin-top: 1rem; /* Adicionado para dar espaço */
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto-primario);
   font-size: 1rem;
-  font-weight: 600;
-  transition: background-color var(--transition-speed);
 }
 
-.login-button:hover {
-  background-color: var(--primary-color-hover);
+.login-card .btn-primary {
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .error-message {
-  color: #ef4444; /* Cor de erro mais moderna */
-  background-color: color-mix(in srgb, #ef4444 15%, transparent);
-  padding: 0.75rem;
-  border-radius: var(--border-radius);
-  margin-bottom: 1rem;
+  color: #EF4444; /* red-500 */
   text-align: center;
-  font-size: 0.875rem;
+  margin-bottom: 1rem;
 }

@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import apiClient from '../api'; // Importar nosso configurador da API
 import './Alunos.css';
 
 function Alunos() {
   const [alunos, setAlunos] = useState([]);
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
-  const [loading, setLoading] = useState(true); // Começa como true
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-   
-    const timer = setTimeout(() => {
-      setAlunos([]); 
-      setLoading(false); 
-    }, 1000); 
+    const fetchAlunos = async () => {
+      try {
+        const response = await apiClient.get('/pedagogico/api/alunos/');
+        setAlunos(response.data);
+      } catch (err) {
+        console.error("Erro ao buscar alunos:", err);
+        setError("Não foi possível carregar os dados dos alunos.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer); 
-  }, []); 
+    fetchAlunos();
+  }, []);
 
   const handleSelecionarAluno = (aluno) => {
     setAlunoSelecionado(aluno);
@@ -26,6 +34,8 @@ function Alunos() {
         <h1>Alunos</h1>
         <button className="btn-primary">Adicionar Aluno +</button>
       </div>
+
+      {error && <div className="error-message">{error}</div>}
 
       <div className="content-layout">
         <div className="lista-container card">
@@ -50,7 +60,8 @@ function Alunos() {
                     >
                       <td>{aluno.nome}</td>
                       <td>{aluno.matricula}</td>
-                      <td>{aluno.turma}</td>
+                      {/* --- CORREÇÃO AQUI --- */}
+                      <td>{aluno.turma ? aluno.turma.nome : 'Sem turma'}</td>
                     </tr>
                   ))
                 ) : (
@@ -71,7 +82,8 @@ function Alunos() {
                 <div className="card-body">
                   <p><strong>Nome:</strong> {alunoSelecionado.nome}</p>
                   <p><strong>Matrícula:</strong> {alunoSelecionado.matricula}</p>
-                  <p><strong>Turma:</strong> {alunoSelecionado.turma}</p>
+                  {/* --- CORREÇÃO AQUI TAMBÉM --- */}
+                  <p><strong>Turma:</strong> {alunoSelecionado.turma ? `${alunoSelecionado.turma.nome} (${alunoSelecionado.turma.turno})` : 'Não definida'}</p>
                 </div>
               </div>
               <div className="card-detalhes card">
@@ -79,9 +91,9 @@ function Alunos() {
                   <h3>Advertências</h3>
                 </div>
                 <div className="card-body">
-                  {alunoSelecionado.advertencias.length > 0 ? (
+                  {alunoSelecionado.advertencias && alunoSelecionado.advertencias.length > 0 ? (
                     <ul>{alunoSelecionado.advertencias.map((adv, i) => <li key={i}><strong>{adv.data}:</strong> {adv.motivo}</li>)}</ul>
-                  ) : <p className="nenhum-registro">Nenhum registro encontrado.</p>}
+                  ) : <p className="nenhum-registro">Nenhum registro de advertência.</p>}
                 </div>
               </div>
             </div>

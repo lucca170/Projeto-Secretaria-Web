@@ -60,3 +60,34 @@
   display: flex;
   align-items: center;
 }
+
+.navbar-actions {
+  gap: 1rem; /* Adiciona espaço entre o switcher e as informações do usuário */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info span {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.btn-logout {
+  background-color: var(--cor-fundo);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
+  padding: 0.5rem 1rem;
+  border-radius: var(--raio-borda);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria);
+}
