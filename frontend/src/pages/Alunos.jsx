@@ -4,20 +4,17 @@ import './Alunos.css';
 function Alunos() {
   const [alunos, setAlunos] = useState([]);
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Começa como true
 
   useEffect(() => {
-    // Simulação de chamada de API
-    setTimeout(() => {
-      const dadosApi = [
-        { id: 1, nome: 'Ana Beatriz Costa', matricula: '2025001', turma: '3º Ano A', advertencias: [], recados: [] },
-        { id: 2, nome: 'Carlos Eduardo Lima', matricula: '2025002', turma: '2º Ano B', advertencias: [{ data: '20/08/2025', motivo: 'Material incompleto.' }], recados: [] },
-        { id: 3, nome: 'Fernanda Gonçalves', matricula: '2025003', turma: '3º Ano A', advertencias: [], recados: [{ data: '22/08/2025', texto: 'Avisar os pais sobre a reunião.' }] },
-      ];
-      setAlunos(dadosApi);
-      setLoading(false);
-    }, 1000);
-  }, []);
+   
+    const timer = setTimeout(() => {
+      setAlunos([]); 
+      setLoading(false); 
+    }, 1000); 
+
+    return () => clearTimeout(timer); 
+  }, []); 
 
   const handleSelecionarAluno = (aluno) => {
     setAlunoSelecionado(aluno);
