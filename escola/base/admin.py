@@ -1,22 +1,24 @@
+# escola/base/admin.py
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .forms import UsuarioCreationForm
 from .models import Usuario
 
-# Esta classe personaliza como os usuários são exibidos na área de admin
+@admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
-    add_form = UsuarioCreationForm
-    model = Usuario
-    list_display = ['username', 'email', 'first_name', 'last_name', 'cargo', 'is_staff']
-    
-    # Adiciona o campo 'cargo' ao editar um usuário
-    fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('cargo',)}),
-    )
-    # Adiciona o campo 'cargo' ao criar um usuário
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('cargo',)}),
-    )
+    # Campos que aparecem na lista de usuários
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'cargo')
+    list_filter = ('cargo', 'is_staff', 'is_superuser', 'groups')
 
-# Registra o seu modelo de usuário personalizado com a personalização acima
-admin.site.register(Usuario, UsuarioAdmin)
+    # A mágica está aqui. Nós pegamos os 'fieldsets' originais do UserAdmin
+    # e adicionamos uma nova seção para os nossos campos customizados.
+    
+    # Campos para a tela de EDIÇÃO de um usuário
+    fieldsets = UserAdmin.fieldsets + (
+        ('Campos Personalizados', {'fields': ('cargo', 'cpf')}),
+    )
+    
+    # Campos para a tela de CRIAÇÃO de um usuário
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Campos Personalizados', {'fields': ('cargo', 'cpf', 'first_name', 'last_name', 'email')}),
+    )

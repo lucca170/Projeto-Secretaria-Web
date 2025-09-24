@@ -1,30 +1,22 @@
+# escola/base/views.py
+
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
+import json # Adicione esta importação que estava faltando
+
 # Importa as classes de permissão do Django
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from .forms import UsuarioCreationForm
+# REMOVEMOS A IMPORTAÇÃO DO FORMULÁRIO QUE NÃO EXISTE MAIS
+
 # Modelos da app 'base'
 from .models import EventoCalendario, MaterialDidatico, Colaborador, SalaLaboratorio
 # Modelos de outras apps
 from escola.pedagogico.models import Aluno, Disciplina, Nota, EmprestimoMaterial
 from escola.financeiro.models import Mensalidade
 
-# --- ATUALIZAÇÃO IMPORTANTE AQUI ---
-# Adicionamos as classes LoginRequiredMixin e UserPassesTestMixin
-class RegistrarUsuarioView(LoginRequiredMixin, UserPassesTestMixin, generic.CreateView):
-    form_class = UsuarioCreationForm
-    # Após criar um usuário, redireciona para a página inicial do admin
-    success_url = reverse_lazy('admin:index')
-    template_name = 'base/templates/base/registrar.html'
-
-    def test_func(self):
-        # Esta função define a regra de acesso:
-        # Apenas usuários marcados como "staff" (TI) podem acessar.
-        return self.request.user.is_staff
-
-# --- O RESTANTE DO ARQUIVO CONTINUA IGUAL ---
+# REMOVEMOS A CLASSE RegistrarUsuarioView QUE USAVA O FORMULÁRIO ANTIGO
 
 def lista_salas(request):
     salas = SalaLaboratorio.objects.all()
@@ -69,64 +61,21 @@ def lista_colaboradores(request):
 def boletim_aluno(request, aluno_id):
     aluno = get_object_or_404(Aluno, id=aluno_id)
     notas = Nota.objects.filter(aluno=aluno).select_related('disciplina')
-    
+
     disciplinas = {}
     for nota in notas:
         if nota.disciplina.nome not in disciplinas:
             disciplinas[nota.disciplina.nome] = []
         disciplinas[nota.disciplina.nome].append(nota.valor)
-        
+
     boletim = {
         'aluno': aluno,
         'disciplinas': disciplinas
     }
-    
+
     return render(request, 'base/boletim_aluno.html', {'boletim': boletim})
 
 def lista_alunos_para_boletim(request):
     alunos = Aluno.objects.all()
     return render(request, 'base/lista_alunos_para_boletim.html', {'alunos': alunos})
 
-def boletim_aluno(request, aluno_id):
-    aluno = get_object_or_404(Aluno, id=aluno_id)
-    notas = Nota.objects.filter(aluno=aluno)
-    disciplinas = Disciplina.objects.all()
-
-    # Estrutura de dados para o boletim
-    boletim = {}
-    for disciplina in disciplinas:
-        boletim[disciplina.nome] = {
-            'notas': [],
-            'comentarios': []
-        }
-
-    for nota in notas:
-        if nota.disciplina.nome in boletim:
-            boletim[nota.disciplina.nome]['notas'].append(nota.nota)
-            if nota.comentario:
-                boletim[nota.disciplina.nome]['comentarios'].append(nota.comentario)
-
-    # Dados para o gráfico
-    notas_por_disciplina = []
-    for disciplina, dados in boletim.items():
-        if dados['notas']:
-            media = sum(dados['notas']) / len(dados['notas'])
-            notas_por_disciplina.append(float(media))
-        else:
-            notas_por_disciplina.append(0)
-
-    chart_data = {
-        'labels': [disciplina.nome for disciplina in disciplinas],
-        'data': notas_por_disciplina,
-    }
-
-    context = {
-        'aluno': aluno,
-        'boletim': boletim,
-        'chart_data_json': json.dumps(chart_data)
-    }
-    return render(request, 'base/boletim_aluno.html', context)
-
-def lista_alunos_para_boletim(request):
-    alunos = Aluno.objects.all()
-    return render(request, 'base/lista_alunos_para_boletim.html', {'alunos': alunos})
