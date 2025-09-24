@@ -10,6 +10,7 @@ class Usuario(AbstractUser):
         ('coordenacao', 'Coordenação'),
         ('secretaria', 'Secretaria'),
         ('diretor', 'Diretor'), 
+        ('responsavel', 'Responsável')
     )
     cpf = models.CharField(max_length=14, unique=True, null=True, blank=True)
     cargo = models.CharField(max_length=20, choices=CARGO_CHOICES, default='aluno')

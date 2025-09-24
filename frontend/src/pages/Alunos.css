@@ -1,17 +1,67 @@
-.alunos-container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: var(--background-secondary);
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  border: 1px solid var(--border-color);
+/* Layout Geral da Página */
+.page-container {
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
-.alunos-container h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: var(--text-primary);
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 1.875rem; /* 30px */
+  font-weight: 700;
+  color: var(--cor-texto-primario);
+}
+
+/* Botão Primário */
+.btn-primary {
+  background-color: var(--cor-primaria);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--raio-borda);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-primary:hover {
+  background-color: #4338CA; /* Indigo 700 */
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+
+/* Layout de Conteúdo (Lista e Detalhes) */
+.content-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.card {
+  background-color: var(--cor-fundo-card);
+  border-radius: var(--raio-borda);
+  border: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-card);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* Tabela de Alunos */
+.lista-container {
+  overflow: hidden; /* Garante que o conteúdo não vaze */
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .alunos-table {
@@ -19,22 +69,81 @@
   border-collapse: collapse;
 }
 
-.alunos-table th,
-.alunos-table td {
-  border-bottom: 1px solid var(--border-color);
+.alunos-table th, .alunos-table td {
   padding: 1rem;
   text-align: left;
+  border-bottom: 1px solid var(--cor-borda);
 }
 
 .alunos-table th {
-  background: var(--background-primary);
-  color: var(--text-secondary);
-  font-weight: 600;
-  text-transform: uppercase;
   font-size: 0.75rem;
+  color: var(--cor-texto-secundario);
+  text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.alunos-table tr:hover {
-  background-color: var(--background-primary);
+.alunos-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.alunos-table tbody tr:hover {
+  background-color: var(--cor-fundo);
+}
+
+.alunos-table tbody tr.selecionado {
+  background-color: var(--cor-primaria);
+  color: white;
+}
+
+.table-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--cor-texto-secundario);
+}
+
+
+/* Detalhes do Aluno */
+.detalhes-container .card-detalhes {
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card-body p {
+  margin: 0 0 0.5rem 0;
+  color: var(--cor-texto-secundario);
+}
+.card-body p strong {
+  color: var(--cor-texto-primario);
+}
+
+.card-body ul {
+  padding-left: 0;
+  list-style: none;
+  margin: 0;
+}
+
+.empty-details {
+  padding: 2rem;
+  text-align: center;
+  color: var(--cor-texto-secundario);
+}
+
+.empty-details h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--cor-texto-primario);
 }

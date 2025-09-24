@@ -1,0 +1,20 @@
+.theme-switcher {
+  background-color: var(--cor-fundo);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.theme-switcher:hover {
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria);
+  transform: rotate(15deg);
+}

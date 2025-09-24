@@ -1,43 +1,36 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useContext } from 'react'; // Importar useContext
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeContext } from './context/ThemeContext'; // Importar o contexto
 import Navbar from './components/Navbar';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
 import Alunos from './pages/Alunos';
-import './App.css';
-
-// Componente para renderizar o layout principal com Navbar
-const MainLayout = () => {
-  const location = useLocation();
-  // Não mostra o Navbar na página de login
-  const showNavbar = location.pathname !== '/login';
-
-  return (
-    <>
-      {showNavbar && <Navbar />}
-      <main className="main-content">
-        <div className="container">
-          <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/alunos" element={<Alunos />} />
-            {/* Adicione outras rotas que usam o layout principal aqui */}
-          </Routes>
-        </div>
-      </main>
-    </>
-  );
-};
+import Turmas from './pages/Turmas';
+import Professores from './pages/Professores';
+import Atividades from './pages/Atividades';
+import Calendario from './pages/Calendario';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 
 function App() {
+  const { theme } = useContext(ThemeContext); // Usar o contexto
+
   return (
-    <Router>
-      <Routes>
-        {/* Rota de Login sem o layout principal */}
-        <Route path="/login" element={<Login />} />
-        {/* Todas as outras rotas usarão o MainLayout */}
-        <Route path="/*" element={<MainLayout />} />
-      </Routes>
-    </Router>
+    // Aplicar o atributo data-theme aqui
+    <div className="App" data-theme={theme}>
+      <Router>
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/alunos" element={<Alunos />} />
+            <Route path="/turmas" element={<Turmas />} />
+            <Route path="/professores" element={<Professores />} />
+            <Route path="/atividades" element={<Atividades />} />
+            <Route path="/calendario" element={<Calendario />} />
+          </Routes>
+        </main>
+      </Router>
+    </div>
   );
 }
 

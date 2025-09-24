@@ -1,112 +1,62 @@
-.header {
-  background-color: var(--background-secondary);
-  box-shadow: var(--box-shadow);
-  height: 64px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed; /* Mude para fixed para ficar sempre no topo */
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  width: 100%;
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color var(--transition-speed);
+.navbar-header {
+  background-color: var(--cor-navbar-fundo);
+  border-bottom: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-navbar);
+  transition: background-color 0.2s, border-color 0.2s;
 }
-/* ... resto do CSS do Navbar que já te passei antes ... */
 
 .navbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 100%;
-  width: 100%;
-  max-width: 1280px;
+  justify-content: space-between;
+  height: 64px;
   padding: 0 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
-.navbar-logo {
-  color: var(--primary-color);
+.navbar-logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-text {
   font-size: 1.25rem;
   font-weight: 700;
-  text-decoration: none;
+  color: var(--cor-texto-primario);
+  transition: color 0.2s;
 }
 
-.nav-menu {
-  display: flex;
-  align-items: center;
+.navbar-links {
   list-style: none;
-  gap: 1rem;
+  display: flex;
   margin: 0;
   padding: 0;
-}
-
-.nav-item {
-  height: 64px;
-  display: flex;
-  align-items: center;
-}
-
-.nav-links {
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  padding: 0 0.5rem;
-  height: 100%;
-  cursor: pointer;
-  font-weight: 500;
-  position: relative;
-  transition: color var(--transition-speed);
-  border-bottom: 2px solid transparent;
-}
-
-.nav-links:hover {
-  color: var(--text-primary);
-}
-
-.nav-links.active {
-  color: var(--primary-color);
-  border-bottom: 2px solid var(--primary-color);
-}
-
-.nav-controls {
-  display: flex;
-  align-items: center;
   gap: 1rem;
 }
 
-.theme-toggle-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-secondary);
-  padding: 0.5rem;
+.navbar-links li a {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--cor-texto-secundario);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--raio-borda);
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.navbar-links li a:hover {
+  color: var(--cor-texto-primario);
+  background-color: var(--cor-fundo);
+}
+
+.navbar-links li a.active {
+  color: var(--cor-primaria);
+  font-weight: 600;
+}
+
+.navbar-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius);
-}
-.theme-toggle-button:hover {
-  color: var(--text-primary);
-  background-color: var(--background-primary);
-}
-
-.logout-button {
-  background-color: transparent;
-  color: var(--primary-color);
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary-color);
-  border-radius: var(--border-radius);
-  transition: background-color var(--transition-speed), color var(--transition-speed);
-  font-weight: 500;
-  cursor: pointer;
-  font-family: var(--font-family);
-  font-size: 0.875rem;
-}
-
-.logout-button:hover {
-  background-color: var(--primary-color);
-  color: var(--background-secondary);
 }
