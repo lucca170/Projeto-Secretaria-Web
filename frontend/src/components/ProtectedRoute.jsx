@@ -1,16 +1,16 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = () => {
-  const { token } = useContext(AuthContext);
+  const { token } = useAuth();
 
   if (!token) {
-    // Se não estiver logado, redireciona para a página de login
+    // Se não houver token, redireciona para a página de login
     return <Navigate to="/login" replace />;
   }
 
-  // Se estiver logado, renderiza o conteúdo da rota
+  // Se houver token, permite o acesso à página solicitada
   return <Outlet />;
 };
 

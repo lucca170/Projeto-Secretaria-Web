@@ -1,12 +1,13 @@
-import React, { useContext } from 'react';
+import React from 'react'; // Não precisa mais do useContext
 import { NavLink } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext'; // Importar nosso novo hook
 import ThemeSwitcher from './ThemeSwitcher';
 import './Navbar.css';
 
 function Navbar() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth(); // Usar o hook aqui
 
+  // ... o resto do componente continua igual
   return (
     <header className="navbar-header">
       <nav className="navbar">
@@ -16,7 +17,7 @@ function Navbar() {
           </NavLink>
         </div>
         
-        {user && ( // Mostra os links apenas se o usuário estiver logado
+        {user && (
           <ul className="navbar-links">
             <li><NavLink to="/alunos">Alunos</NavLink></li>
             <li><NavLink to="/turmas">Turmas</NavLink></li>

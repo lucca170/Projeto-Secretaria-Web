@@ -1,13 +1,14 @@
 import React, { useContext, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+
 import { ThemeContext } from './context/ThemeContext';
-import ProtectedRoute from './components/ProtectedRoute'; // Importar
+import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import Alunos from './pages/Alunos';
 import Turmas from './pages/Turmas';
 import Professores from './pages/Professores';
-import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
 
 function App() {
   const { theme } = useContext(ThemeContext);
@@ -23,7 +24,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           
-          {/* Rotas Protegidas */}
+          {/* Rotas que precisam de login */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/alunos" element={<Alunos />} />

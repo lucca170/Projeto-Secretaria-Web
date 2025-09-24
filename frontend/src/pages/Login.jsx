@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import React, { useState } from 'react'; // Não precisa mais do useContext
+import { useAuth } from '../context/AuthContext'; // Importar nosso novo hook
 import './Login.css';
 
 function Login() {
@@ -7,7 +7,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth(); // Usar o hook aqui
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +15,6 @@ function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      // O redirecionamento é feito dentro do contexto
     } catch (err) {
       setError(err.message || 'Falha ao tentar fazer login.');
     } finally {
@@ -23,6 +22,7 @@ function Login() {
     }
   };
 
+  // ... o resto do componente continua igual
   return (
     <div className="login-container">
       <div className="login-card card">

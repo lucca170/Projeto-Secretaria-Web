@@ -1,21 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import apiClient from '../api'; // Importar nosso configurador da API
+import apiClient from '../api';
 import './Alunos.css';
 
 function Alunos() {
-  const [alunos, setAlunos] = useState([]);
+  const [alunos, setAlunos] = useState([]); // Garante que o valor inicial seja um array
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchAlunos = async () => {
+      setError(null); // Limpa erros anteriores
       try {
         const response = await apiClient.get('/pedagogico/api/alunos/');
-        setAlunos(response.data);
+        
+        // --- CORREÇÃO PRINCIPAL AQUI ---
+        // Verificamos se a resposta (response.data) é um array.
+        // Se não for, usamos um array vazio como padrão.
+        // Isso previne o erro .map() de um valor undefined.
+        const dadosAlunos = Array.isArray(response.data) ? response.data : [];
+        
+        setAlunos(dadosAlunos);
+
       } catch (err) {
         console.error("Erro ao buscar alunos:", err);
         setError("Não foi possível carregar os dados dos alunos.");
+        setAlunos([]); // Em caso de erro, também garantimos que seja um array vazio
       } finally {
         setLoading(false);
       }
@@ -60,7 +70,6 @@ function Alunos() {
                     >
                       <td>{aluno.nome}</td>
                       <td>{aluno.matricula}</td>
-                      {/* --- CORREÇÃO AQUI --- */}
                       <td>{aluno.turma ? aluno.turma.nome : 'Sem turma'}</td>
                     </tr>
                   ))
@@ -82,7 +91,6 @@ function Alunos() {
                 <div className="card-body">
                   <p><strong>Nome:</strong> {alunoSelecionado.nome}</p>
                   <p><strong>Matrícula:</strong> {alunoSelecionado.matricula}</p>
-                  {/* --- CORREÇÃO AQUI TAMBÉM --- */}
                   <p><strong>Turma:</strong> {alunoSelecionado.turma ? `${alunoSelecionado.turma.nome} (${alunoSelecionado.turma.turno})` : 'Não definida'}</p>
                 </div>
               </div>
