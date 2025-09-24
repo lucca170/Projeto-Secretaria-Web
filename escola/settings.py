@@ -65,6 +65,7 @@ TEMPLATES = [
 
 INSTALLED_APPS = [
     'jazzmin',
+    'escola.base',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -78,7 +79,6 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Suas aplicações
-    'escola.base',
     'escola.coordenacao',
     'escola.disciplinar',
     'escola.financeiro',
