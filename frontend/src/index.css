@@ -1,0 +1,46 @@
+/* Estilos Globais e Variáveis de Tema */
+:root {
+  --cor-primaria: #4F46E5; /* Indigo */
+  --cor-secundaria: #10B981; /* Emerald */
+  --cor-fundo: #F3F4F6; /* Gray 100 */
+  --cor-fundo-card: #FFFFFF;
+  --cor-texto-primario: #1F2937; /* Gray 800 */
+  --cor-texto-secundario: #6B7280; /* Gray 500 */
+  --cor-borda: #E5E7EB; /* Gray 200 */
+  --cor-navbar-fundo: #FFFFFF;
+  --cor-navbar-texto: #374151; /* Gray 700 */
+  --sombra-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --sombra-navbar: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --raio-borda: 0.5rem; /* 8px */
+}
+
+[data-theme='dark'] {
+  --cor-primaria: #6366F1; /* Indigo */
+  --cor-secundaria: #10B981; /* Emerald */
+  --cor-fundo: #111827; /* Gray 900 */
+  --cor-fundo-card: #1F2937; /* Gray 800 */
+  --cor-texto-primario: #F9FAFB; /* Gray 50 */
+  --cor-texto-secundario: #9CA3AF; /* Gray 400 */
+  --cor-borda: #374151; /* Gray 700 */
+  --cor-navbar-fundo: #1F2937; /* Gray 800 */
+  --cor-navbar-texto: #D1D5DB; /* Gray 300 */
+  --sombra-card: 0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+  --sombra-navbar: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto-primario);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Estilo para o container principal da aplicação */
+.main-content {
+  padding: 2rem;
+}

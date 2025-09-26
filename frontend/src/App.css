@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-family: 'Inter', sans-serif;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+  
+  /* Tema Claro */
+  --primary-color: #3b82f6;
+  --primary-color-hover: #2563eb;
+  --background-primary: #f0f2f5;
+  --background-secondary: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+body.dark-theme {
+  /* Tema Escuro */
+  --primary-color: #60a5fa;
+  --primary-color-hover: #3b82f6;
+  --background-primary: #111827;
+  --background-secondary: #1f2937;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+  --box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.main-content {
+  padding-top: 64px; /* Altura do Navbar para não sobrepor o conteúdo */
+}
+
+.container {
+  padding: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}

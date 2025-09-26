@@ -1,0 +1,93 @@
+.navbar-header {
+  background-color: var(--cor-navbar-fundo);
+  border-bottom: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-navbar);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.navbar-logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cor-texto-primario);
+  transition: color 0.2s;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 1rem;
+}
+
+.navbar-links li a {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--cor-texto-secundario);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--raio-borda);
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.navbar-links li a:hover {
+  color: var(--cor-texto-primario);
+  background-color: var(--cor-fundo);
+}
+
+.navbar-links li a.active {
+  color: var(--cor-primaria);
+  font-weight: 600;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-actions {
+  gap: 1rem; /* Adiciona espaço entre o switcher e as informações do usuário */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info span {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.btn-logout {
+  background-color: var(--cor-fundo);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto-secundario);
+  padding: 0.5rem 1rem;
+  border-radius: var(--raio-borda);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria);
+}
