@@ -3,7 +3,7 @@ import apiClient from '../api';
 import './Turmas.css'; 
 
 function Turmas() {
-  // Estados para as turmas
+  // Estados para as turmas 
   const [turmas, setTurmas] = useState([]);
   const [turmaSelecionada, setTurmaSelecionada] = useState(null);
   const [loadingTurmas, setLoadingTurmas] = useState(true);

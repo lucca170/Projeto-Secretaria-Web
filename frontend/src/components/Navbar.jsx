@@ -13,7 +13,7 @@ function Navbar() {
       <nav className="navbar">
         <div className="navbar-logo">
           <NavLink to="/">
-            <span className="logo-text">SecretariaWeb</span>
+            <span className="logo-text">Sesi Garavelo</span>
           </NavLink>
         </div>
         
