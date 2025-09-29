@@ -1,5 +1,3 @@
-# escola/pedagogico/urls.py
-
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
@@ -13,5 +11,5 @@ urlpatterns = [
     path('adicionar_turma/', views.adicionar_turma, name='adicionar_turma'),
     path('turmas/', views.lista_turmas, name='lista_turmas'),
     
-    path('api/', include(router.urls)),
+   path('', include(router.urls)),
 ]

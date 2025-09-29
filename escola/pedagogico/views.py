@@ -1,15 +1,22 @@
-# escola/pedagogico/views.py
-
 from django.shortcuts import render, redirect
 from .forms import TurmaForm, AlunoForm
 from .models import Turma, Aluno
-
-# Imports para a API
 from rest_framework import viewsets
 from .serializers import AlunoSerializer, TurmaSerializer
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework.permissions import IsAuthenticated # Importar
 
+class AlunoViewSet(viewsets.ModelViewSet):
+    queryset = Aluno.objects.all()
+    serializer_class = AlunoSerializer
+    # --- 2. ADICIONE AS LINHAS ABAIXO ---
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['turma']  # Permite filtrar por /api/pedagogico/alunos/?turma=1
+
+class TurmaViewSet(viewsets.ModelViewSet):
+    queryset = Turma.objects.all()
+    serializer_class = TurmaSerializer
 
 
 # SUAS VIEWS ANTIGAS (baseadas em templates)

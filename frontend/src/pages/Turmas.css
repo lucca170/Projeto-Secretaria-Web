@@ -1,3 +1,92 @@
-.turmas-container {
+.content-layout {
+  display: grid;
+  grid-template-columns: 40% 1fr; /* Coluna da esquerda menor, direita maior */
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.lista-container,
+.detalhes-container {
+  width: 100%;
+}
+
+.card {
+  background-color: var(--background-color-light);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
+}
+
+.turmas-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.turmas-table th,
+.turmas-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.turmas-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.turmas-table tbody tr:hover {
+  background-color: var(--hover-color);
+}
+
+.turmas-table tbody tr.selecionado {
+  background-color: var(--primary-color-light);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.table-state {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+  font-style: italic;
+}
+
+.empty-details {
+  text-align: center;
+  padding: 40px;
+  color: #777;
+}
+
+.empty-details h3 {
+  margin-bottom: 10px;
+}
+
+.alunos-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.alunos-lista li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.alunos-lista li:last-child {
+  border-bottom: none;
+}
+
+.aluno-nome {
+  font-weight: 500;
+}
+
+.aluno-matricula {
+  font-size: 0.9em;
+  color: #666;
+  background-color: var(--background-color);
+  padding: 3px 8px;
+  border-radius: 12px;
 }

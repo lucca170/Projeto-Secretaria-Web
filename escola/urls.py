@@ -13,7 +13,7 @@ urlpatterns = [
     path('', include('escola.base.urls')),
     
     # Incluindo TODAS as URLs da app `pedagogico`
-    path('pedagogico/', include('escola.pedagogico.urls')),
+   path('api/pedagogico/', include('escola.pedagogico.urls')),
     
     # Incluindo outras apps (exemplo)
     path('disciplinar/', include('escola.disciplinar.urls')),

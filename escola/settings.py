@@ -28,17 +28,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Apps de terceiros
+    'rest_framework',
+    'corsheaders',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'django_filters',
+    
     # Nossas apps
     'escola.base',
     'escola.coordenacao',
     'escola.disciplinar',
     'escola.financeiro',
     'escola.pedagogico',
-    # Apps de terceiros
-    'rest_framework',
-    'corsheaders',
-    'rest_framework.authtoken',
-    'dj_rest_auth',
 ]
 
 MIDDLEWARE = [

@@ -6,26 +6,19 @@ function Alunos() {
   const [alunos, setAlunos] = useState([]); // Garante que o valor inicial seja um array
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null);   
 
   useEffect(() => {
     const fetchAlunos = async () => {
-      setError(null); // Limpa erros anteriores
+      setError(null);
       try {
-        const response = await apiClient.get('/pedagogico/api/alunos/');
-        
-        // --- CORREÇÃO PRINCIPAL AQUI ---
-        // Verificamos se a resposta (response.data) é um array.
-        // Se não for, usamos um array vazio como padrão.
-        // Isso previne o erro .map() de um valor undefined.
-        const dadosAlunos = Array.isArray(response.data) ? response.data : [];
-        
+        const responseCorrigida = await apiClient.get('pedagogico/alunos/');
+        const dadosAlunos = Array.isArray(responseCorrigida.data) ? responseCorrigida.data : [];
         setAlunos(dadosAlunos);
 
       } catch (err) {
-        console.error("Erro ao buscar alunos:", err);
-        setError("Não foi possível carregar os dados dos alunos.");
-        setAlunos([]); // Em caso de erro, também garantimos que seja um array vazio
+        setError('Erro ao carregar alunos.');
+        setAlunos([]);
       } finally {
         setLoading(false);
       }
