@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Login.css';
+import { Container, Box, TextField, Button, Typography, Alert, Avatar } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
-const Login = () => {
+function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  // Redireciona se já estiver logado
+  React.useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    // Adiciona verificação para "undefined" caso um login anterior tenha falhado
+    if (token && token !== 'undefined') {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
+      // --- CORREÇÃO 1: Ajuste da URL ---
+      // O seu urls.py usa 'api-token-auth/', e não 'api/token/'
       const response = await fetch('http://127.0.0.1:8000/api-token-auth/', {
         method: 'POST',
         headers: {
@@ -23,53 +35,77 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('token', data.token);
+        
+        // --- CORREÇÃO 2: Salvar o token correto ---
+        // O AuthToken do DRF retorna "token", não "access"
+        localStorage.setItem('authToken', data.token); 
         navigate('/dashboard');
       } else {
-        const errorData = await response.json();
-        setError(errorData.non_field_errors?.[0] || 'Falha no login. Verifique suas credenciais.');
+        setError('Falha no login. Verifique seu usuário e senha.');
       }
     } catch (err) {
-      setError('Erro ao conectar com o servidor. Tente novamente mais tarde.');
+      setError('Erro ao conectar ao servidor.');
     }
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-header">
-          <h1>Bem-vindo!</h1>
-          <p>Faça login para acessar o painel da secretaria.</p>
-        </div>
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="input-group">
-            <label htmlFor="username">Usuário</label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              placeholder="Digite seu usuário"
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="password">Senha</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Digite sua senha"
-            />
-          </div>
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="login-button">Entrar</button>
-        </form>
-      </div>
-    </div>
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Login - Secretaria
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Usuário"
+            name="username"
+            autoComplete="username"
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Senha"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && (
+            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Entrar
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
-};
+}
 
 export default Login;
