@@ -1,4 +1,7 @@
-from django.urls import path
+
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter 
+from . import views
 from .views import (
     adicionar_turma, lista_turmas,
     lista_alunos, lista_disciplinas, lista_notas, lista_emprestimos,
