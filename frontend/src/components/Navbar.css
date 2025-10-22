@@ -56,3 +56,39 @@
   display: flex;
   align-items: center;
 }
+
+/* Adiciona variáveis padrão e tema escuro como fallback */
+:root {
+  --nav-background: #ffffff;
+  --border-color: #e5e7eb;
+  --text-color: #111827;
+  --primary-color: #2563eb;
+}
+
+/* Tema escuro alternativo (use html[data-theme="dark"] = "dark") */
+html[data-theme="dark"] {
+  --nav-background: #0f172a;
+  --border-color: #1f2937;
+  --text-color: #e6eef8;
+  --primary-color: #60a5fa;
+}
+
+/* Estilos do botão de alternância de tema dentro da navbar */
+.navbar .theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.navbar .theme-toggle:hover {
+  background: rgba(0,0,0,0.03);
+  border-color: var(--primary-color);
+}
