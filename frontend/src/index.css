@@ -1,0 +1,39 @@
+<<<<<<< HEAD
+/* src/index.css */
+
+:root {
+  --background-color: #ffffff;
+  --text-color: #212529;
+  --nav-background: #f8f9fa;
+  --card-background: #ffffff;
+  --border-color: #dee2e6;
+  --primary-color: #007bff;
+  
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark {
+  --background-color: #1a1a1a;
+  --text-color: #f8f9fa;
+  --nav-background: #212529;
+  --card-background: #2a2a2a;
+  --border-color: #495057;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+=======
+/* Estilos gerais */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  background-color: #f4f7f6;
+}
+
+.container {
+    padding: 2rem;
+>>>>>>> 0619855925e5aad0ec7553204e69828ab97532e1
+}

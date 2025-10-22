@@ -1,0 +1,14 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Selecione um Aluno para ver o Boletim</h2>
+    <ul class="list-group">
+        {% for aluno in alunos %}
+        <li class="list-group-item">
+            <a href="{% url 'boletim_aluno' aluno.id %}">{{ aluno.nome }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
