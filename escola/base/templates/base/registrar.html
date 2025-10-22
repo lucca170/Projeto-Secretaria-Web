@@ -1,0 +1,123 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-box">
+        <h2>Criar Conta</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="input-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <div class="error-message">
+                            <small>{{ error }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            
+            <button type="submit" class="register-button">Registrar</button>
+        </form>
+        <div class="login-link">
+            <p>Já tem uma conta? <a href="/">Faça login</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .register-box {
+        background-color: #1e1e1e;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .register-box h2 {
+        margin-bottom: 25px;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #a0a0a0;
+        font-size: 14px;
+    }
+
+    .input-group input, .input-group select {
+        width: 100%;
+        padding: 12px 15px;
+        background-color: #2c2c2c;
+        border: 1px solid #444;
+        border-radius: 8px;
+        color: #e0e0e0;
+        font-size: 16px;
+        box-sizing: border-box; /* Garante que padding não afete a largura total */
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .input-group input:focus, .input-group select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+
+    .error-message {
+        color: #ff4d4d;
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    .register-button {
+        width: 100%;
+        padding: 12px;
+        background-color: #007bff;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-top: 10px;
+    }
+
+    .register-button:hover {
+        background-color: #0056b3;
+    }
+
+    .login-link {
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+    .login-link a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
