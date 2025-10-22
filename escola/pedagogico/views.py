@@ -88,3 +88,7 @@ class AlunoViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAdminUser] # Ações desconhecidas só para admin
 
         return [permission() for permission in permission_classes]
+    
+        return render(request, 'pedagogico/lista_alunos_para_boletim.html', {'alunos': alunos})
+
+    
