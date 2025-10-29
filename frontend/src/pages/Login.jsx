@@ -1,49 +1,32 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Box, TextField, Button, Typography, Alert, Avatar } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+// REMOVEMOS: useAuth
+// import { useNavigate } from 'react-router-dom'; // Já não precisa aqui
+import { Box, TextField, Button, Typography, Container } from '@mui/material';
 
-function Login() {
+function Login({ onLoginSuccess }) { // Recebe onLoginSuccess do App.jsx
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  // REMOVEMOS: login e navigate
 
-  // Redireciona se já estiver logado
-  React.useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token && token !== 'undefined') {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError('');
-
     try {
-      // MUDANÇA 1: Aponta para a nova URL de login customizada
-      const response = await fetch('http://127.0.0.1:8000/api/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        // MUDANÇA 2: Salva o token E os dados do usuário (incluindo o cargo/role)
-        localStorage.setItem('authToken', data.token); 
-        localStorage.setItem('userData', JSON.stringify(data.user)); 
-
-        navigate('/dashboard');
+      // **** SIMULAÇÃO DE LOGIN ****
+      // SUBSTITUA pela sua chamada real à API de login depois
+      if (username === 'admin' && password === 'admin') { // Exemplo simples
+          console.log("Simulando login bem-sucedido...");
+          onLoginSuccess(); // Chama a função passada pelo App para marcar como logado
+          // O App.jsx vai cuidar do redirecionamento
       } else {
-        setError('Falha no login. Verifique seu usuário e senha.');
+        setError('Usuário ou senha inválidos (teste: admin/admin).');
       }
+      // **** FIM DA SIMULAÇÃO ****
+
     } catch (err) {
-      setError('Erro ao conectar ao servidor.');
+      console.error("Erro na simulação de login:", err);
+      setError('Ocorreu um erro ao tentar fazer login.');
     }
   };
 
@@ -57,13 +40,10 @@ function Login() {
           alignItems: 'center',
         }}
       >
-        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-          <LockOutlinedIcon />
-        </Avatar>
         <Typography component="h1" variant="h5">
-          Login - Secretaria
+          Login - Secretaria Web
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
             required
@@ -89,9 +69,9 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
           {error && (
-            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+            <Typography color="error" variant="body2" align="center" sx={{ mt: 1 }}>
               {error}
-            </Alert>
+            </Typography>
           )}
           <Button
             type="submit"
@@ -108,4 +88,3 @@ function Login() {
 }
 
 export default Login;
-

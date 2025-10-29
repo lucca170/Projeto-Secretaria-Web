@@ -147,7 +147,6 @@ def relatorio_geral_faltas(request):
     # Template: 'pedagogico/relatorio_faltas.html'
     return render(request, 'pedagogico/relatorio_faltas.html', context)
 
-@login_required
 def relatorio_gerencial(request):
     """
     Implementa: 'Análise de eficiência: Taxa de aprovação e Taxa de evasão'

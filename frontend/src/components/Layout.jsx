@@ -1,119 +1,66 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useTheme } from '@mui/material/styles';
-import SidebarItems from './SidebarItems'; // Importa os links do menu
+import { Outlet, Link, useNavigate } from 'react-router-dom'; // Adiciona useNavigate
+import { AppBar, Toolbar, IconButton, Typography, Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
+// import MenuIcon from '@mui/icons-material/Menu';
 
-const drawerWidth = 240; // Largura do menu lateral
+// REMOVEMOS: useAuth
 
-export default function Layout({ toggleTheme }) {
-  const theme = useTheme();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+function Layout({ toggleTheme, onLogout }) { // Recebe onLogout do App.jsx
   const navigate = useNavigate();
 
-  // Verifica se o usuário está logado, senão, redireciona para o login
-  React.useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    
-    // --- CORREÇÃO: Verificação de token mais robusta ---
-    // Impede que um token "undefined" (string) seja considerado válido
-    if (!token || token === 'undefined') {
-      navigate('/');
-    }
-  }, [navigate]);
-
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+  const handleLogoutClick = () => {
+    onLogout(); // Chama a função passada pelo App
+    navigate('/login'); // Redireciona para login após logout
   };
 
-  // Conteúdo do menu lateral
-  const drawer = (
-    <div>
-      <Toolbar /> {/* Espaçador para ficar abaixo da barra superior */}
-      <List>
-        <SidebarItems />
-      </List>
-    </div>
-  );
+  const drawerWidth = 240;
 
   return (
     <Box sx={{ display: 'flex' }}>
-      {/* Barra Superior (AppBar) */}
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-        }}
-      >
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }} // Ícone do menu (só aparece no mobile)
-          >
-            <MenuIcon />
-          </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Secretaria Escolar
+            Secretaria Web
           </Typography>
-          <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
-            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
+          {/* Adicione seu ThemeToggleButton aqui se tiver */}
+          <Button color="inherit" onClick={handleLogoutClick}>Logout</Button> {/* Chama handleLogoutClick */}
         </Toolbar>
       </AppBar>
-      
-      {/* Menu Lateral (Drawer) */}
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      >
-        {/* Gaveta temporária (Mobile) */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Melhor performance em mobile.
-          }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        {/* Gaveta permanente (Desktop) */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-      
-      {/* Conteúdo Principal da Página */}
-      <Box
-        component="main"
+
+      <Drawer
+        variant="permanent"
         sx={{
-          flexGrow: 1,
-          p: 3, // Padding
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
         }}
       >
-        <Toolbar /> {/* Espaçador para o conteúdo não ficar atrás da AppBar */}
-        <Outlet /> {/* Aqui é onde o React Router renderiza a página atual (ex: Dashboard, Alunos) */}
+        <Toolbar />
+        <Box sx={{ overflow: 'auto' }}>
+          <List>
+            <ListItem button component={Link} to="/dashboard">
+              <ListItemText primary="Dashboard" />
+            </ListItem>
+            <ListItem button component={Link} to="/alunos">
+              <ListItemText primary="Alunos" />
+            </ListItem>
+            <ListItem button component={Link} to="/calendario">
+              <ListItemText primary="Calendário" />
+            </ListItem>
+            <ListItem button component={Link} to="/eventos">
+              <ListItemText primary="Eventos" />
+            </ListItem>
+            {/* ADICIONAREMOS NOVOS LINKS AQUI */}
+          </List>
+        </Box>
+      </Drawer>
+
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
+        <Outlet />
       </Box>
     </Box>
   );
 }
+
+export default Layout;

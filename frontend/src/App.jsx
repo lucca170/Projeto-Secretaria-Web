@@ -1,24 +1,25 @@
 import React, { useState, useMemo } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
-// Páginas
+// Páginas Base (serão criadas a seguir)
 import Login from './pages/Login';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import Alunos from './pages/Alunos'; // Página de exemplo
+import Alunos from './pages/Alunos';
+import EventosExtracurriculares from './pages/EventosExtracurriculares'; // <-- ADICIONE
+import CalendarioAcademico from './pages/CalendarioAcademico';
+
+// REMOVEMOS: useAuth e ProtectedRoute pois não temos useAuth.js
 
 function App() {
-  // Estado para controlar o modo do tema (light ou dark)
   const [mode, setMode] = useState('light');
 
-  // Função para alternar o tema
   const toggleTheme = () => {
     setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
   };
 
-  // Cria o tema MUI com base no modo atual
   const theme = useMemo(
     () =>
       createTheme({
@@ -29,27 +30,51 @@ function App() {
     [mode],
   );
 
+  // **** SIMULAÇÃO BÁSICA DE LOGIN ****
+  // Vamos usar um estado simples para saber se o usuário está "logado"
+  // SUBSTITUA ISSO pela sua lógica real com useAuth.js depois
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('isSimulatedLoggedIn')); // Verifica se já simulamos login
+
+  const handleLoginSuccess = () => {
+    localStorage.setItem('isSimulatedLoggedIn', 'true'); // Marca como logado no localStorage
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isSimulatedLoggedIn'); // Remove a marca
+    setIsLoggedIn(false);
+    // Idealmente, redirecionar para /login aqui, mas pode ser feito no Layout
+  };
+  // **** FIM DA SIMULAÇÃO ****
+
   return (
     <ThemeProvider theme={theme}>
-      {/* CssBaseline reseta o CSS padrão do navegador e aplica o fundo do tema */}
       <CssBaseline />
-      <Routes>
-        {/* Rota de Login (fora do layout do dashboard) */}
-        <Route path="/" element={<Login />} />
+      <BrowserRouter>
+        <Routes>
+          {/* Rota de Login */}
+          {/* Passa a função para marcar como logado */}
+          <Route path="/login" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLoginSuccess={handleLoginSuccess} />} />
 
-        {/* Rotas do Dashboard (dentro do layout com menu) */}
-        <Route path="/dashboard" element={<Layout toggleTheme={toggleTheme} />}>
-          {/* A rota "index" é a página inicial do dashboard */}
-          <Route index element={<Dashboard />} />
-          
-          {/* Exemplo de nova rota (http://.../dashboard/alunos) */}
-          <Route path="alunos" element={<Alunos />} />
+          {/* Rotas dentro do Layout */}
+          <Route
+            path="/"
+            element={isLoggedIn ? <Layout toggleTheme={toggleTheme} onLogout={handleLogout} /> : <Navigate to="/login" />}
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="alunos" element={<Alunos />} />
+            <Route path="calendario" element={<CalendarioAcademico />} />
+            <Route path="eventos" element={<EventosExtracurriculares />} />
+            <Route path="relatorio/:alunoId" element={<RelatorioAluno />} />
+            <Route path="relatorio/aluno/:alunoId" element={<RelatorioAluno />} />
+            {/* ADICIONAREMOS NOVAS ROTAS AQUI DEPOIS */}
+          </Route>
 
-          {/* Adicione outras rotas aqui (ex: financeiro, pedagogico) */}
-          {/* <Route path="financeiro" element={<PaginaFinanceiro />} /> */}
-          {/* <Route path="pedagogico" element={<PaginaPedagogico />} /> */}
-        </Route>
-      </Routes>
+          {/* Rota para "não encontrado" */}
+          <Route path="*" element={<div>Página não encontrada</div>} />
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }
