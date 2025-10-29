@@ -12,7 +12,6 @@ function Login() {
   // Redireciona se já estiver logado
   React.useEffect(() => {
     const token = localStorage.getItem('authToken');
-    // Adiciona verificação para "undefined" caso um login anterior tenha falhado
     if (token && token !== 'undefined') {
       navigate('/dashboard');
     }
@@ -23,9 +22,8 @@ function Login() {
     setError('');
 
     try {
-      // --- CORREÇÃO 1: Ajuste da URL ---
-      // O seu urls.py usa 'api-token-auth/', e não 'api/token/'
-      const response = await fetch('http://127.0.0.1:8000/api-token-auth/', {
+      // MUDANÇA 1: Aponta para a nova URL de login customizada
+      const response = await fetch('http://127.0.0.1:8000/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,9 +34,10 @@ function Login() {
       if (response.ok) {
         const data = await response.json();
         
-        // --- CORREÇÃO 2: Salvar o token correto ---
-        // O AuthToken do DRF retorna "token", não "access"
+        // MUDANÇA 2: Salva o token E os dados do usuário (incluindo o cargo/role)
         localStorage.setItem('authToken', data.token); 
+        localStorage.setItem('userData', JSON.stringify(data.user)); 
+
         navigate('/dashboard');
       } else {
         setError('Falha no login. Verifique seu usuário e senha.');
@@ -109,3 +108,4 @@ function Login() {
 }
 
 export default Login;
+

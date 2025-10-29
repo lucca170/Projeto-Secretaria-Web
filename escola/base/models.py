@@ -117,9 +117,19 @@ class Nota(models.Model):
 
     def __str__(self):
         return f"{self.aluno} - {self.disciplina} - {self.nota}"
-    nota = models.DecimalField(max_digits=5, decimal_places=2)
-    bimestre = models.CharField(max_length=20) # Ex: "1º Bimestre", "2º Bimestre"
-    comentario = models.TextField(blank=True, null=True) # Campo para comentários do professor
 
+class Turma(models.Model):
+    nome = models.CharField(max_length=100)
+    ano = models.IntegerField()
+    professor = models.ForeignKey('Usuario', on_delete=models.CASCADE, limit_choices_to={'cargo': 'professor'})
+    alunos = models.ManyToManyField('Aluno', related_name='turmas', blank=True)
+    disciplina = models.ForeignKey('Disciplina', on_delete=models.CASCADE)
+    ativo = models.BooleanField(default=True)
+    
+    class Meta:
+        verbose_name = 'Turma'
+        verbose_name_plural = 'Turmas'
+        ordering = ['ano', 'nome']
+    
     def __str__(self):
-        return f"{self.aluno} - {self.disciplina} - {self.nota}"
+        return f"{self.nome} ({self.ano})"

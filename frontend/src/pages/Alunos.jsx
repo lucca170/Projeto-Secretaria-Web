@@ -14,21 +14,23 @@ import {
   TableRow
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import useAuth from '../hooks/useAuth'; // <-- Importa o hook
 
 function Alunos() {
+  const userData = useAuth(); // <-- Pega os dados do usuário logado
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Só executa se tivermos os dados do usuário
+    if (!userData) return; 
+
     setError('');
     setLoading(true);
-    
-    // --- CÓDIGO REAL (EXEMPLO CORRIGIDO) ---
-    // Agora usando o método de autenticação correto
+
     const fetchAlunos = async () => {
       const token = localStorage.getItem('authToken');
-
       if (!token || token === 'undefined') {
         setError('Token não encontrado. Faça login novamente.');
         setLoading(false);
@@ -36,12 +38,10 @@ function Alunos() {
       }
       
       try {
-        // ATENÇÃO: A URL '/pedagogico/api/alunos/' é um EXEMPLO.
-        // Você precisa criar essa rota no seu 'pedagogico/urls.py'
-        // Por enquanto, ela VAI DAR ERRO (o que é esperado)
-        const response = await fetch('http://127.0.0.1:8000/pedagogico/api/alunos/', { // (Ajuste a URL da API)
+        // ATENÇÃO: Esta URL '/pedagogico/api/alunos/' é um EXEMPLO.
+        // Você precisará criá-la no seu `pedagogico/urls.py` e `views.py`
+        const response = await fetch('http://127.0.0.1:8000/pedagogico/api/alunos/', {
           headers: {
-            // --- CORREÇÃO: Usar "Token" e não "Bearer" ---
             'Authorization': `Token ${token}`,
             'Content-Type': 'application/json',
           }
@@ -58,9 +58,7 @@ function Alunos() {
         setAlunos(data);
         
       } catch (err) {
-        // Se a API (ex: /api/alunos/) ainda não existir, ela vai cair aqui.
-        // Isso é esperado até você criar os endpoints no Django.
-        setError(`Erro ao buscar dados: ${err.message}. (Nota: verifique se a rota de API já foi criada no Django)`);
+        setError(`Erro ao buscar dados: ${err.message}. (Verifique se a rota de API já foi criada no Django)`);
       } finally {
         setLoading(false);
       }
@@ -68,7 +66,7 @@ function Alunos() {
 
     fetchAlunos();
 
-  }, []);
+  }, [userData]); // <-- Re-executa se userData mudar
 
   return (
     <Box>
@@ -76,9 +74,14 @@ function Alunos() {
         <Typography variant="h4">
           Gestão de Alunos
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />}>
-          Novo Aluno
-        </Button>
+        
+        {/* --- LÓGICA DE PERMISSÃO CORRIGIDA --- */}
+        {/* Só mostra o botão se o cargo for 'professor' ou 'administrador' */}
+        {userData && (userData.role === 'professor' || userData.role === 'administrador') && (
+          <Button variant="contained" startIcon={<AddIcon />}>
+            Novo Aluno
+          </Button>
+        )}
       </Box>
 
       <TableContainer component={Paper}>
@@ -91,7 +94,10 @@ function Alunos() {
         {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
         
         {!loading && !error && alunos.length === 0 && (
-           <Alert severity="info" sx={{ m: 2 }}>Nenhum aluno encontrado.</Alert>
+           <Alert severity="info" sx={{ m: 2 }}>
+             {/* Mostra msg de erro se a API falhou, ou 'nenhum aluno' se ela funcionou */}
+             {error ? 'Erro ao carregar dados.' : 'Nenhum aluno encontrado.'}
+           </Alert>
         )}
 
         {!loading && !error && alunos.length > 0 && (
@@ -113,8 +119,21 @@ function Alunos() {
                   <TableCell>{aluno.matricula || 'N/A'}</TableCell>
                   <TableCell>{aluno.turma || 'N/A'}</TableCell>
                   <TableCell align="right">
-                    <Button size="small">Editar</Button>
-                    <Button size="small" color="error">Excluir</Button>
+                  
+                    {/* --- LÓGICA DE PERMISSÃO CORRIGIDA --- */}
+                    {/* Professor/Admin pode editar/excluir */}
+                    {userData && (userData.role === 'professor' || userData.role === 'administrador') && (
+                      <>
+                        <Button size="small">Editar</Button>
+                        <Button size="small" color="error">Excluir</Button>
+                      </>
+                    )}
+                    
+                    {/* Aluno vê um botão diferente */}
+                    {userData && userData.role === 'aluno' && (
+                       <Button size="small">Ver Notas</Button>
+                    )}
+                    
                   </TableCell>
                 </TableRow>
               ))}
