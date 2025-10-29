@@ -1,11 +1,31 @@
+# Em: escola/pedagogico/serializers.py
+
 from rest_framework import serializers
-from escola.base.models import Nota, Aluno, Disciplina
+from .models import Nota
 
 class NotaSerializer(serializers.ModelSerializer):
-    aluno_nome = serializers.CharField(source='aluno.nome', read_only=True)
+    """
+    Serializa o model Nota, incluindo nomes de aluno e disciplina
+    para facilitar o frontend.
+    """
+    
+    # Pega o nome completo do aluno (ex: "Gabriel Vinhal")
+    aluno_nome = serializers.CharField(source='aluno.usuario.get_full_name', read_only=True)
+    
+    # Pega o nome da disciplina (ex: "Matemática")
     disciplina_nome = serializers.CharField(source='disciplina.nome', read_only=True)
 
     class Meta:
         model = Nota
-        fields = ['id', 'aluno', 'aluno_nome', 'disciplina', 'disciplina_nome', 'valor', 'data']
-        read_only_fields = ['id', 'aluno_nome', 'disciplina_nome']
+        
+        # Campos que a API vai mostrar/receber
+        fields = [
+            'id', 
+            'aluno', # ID do aluno
+            'aluno_nome', # Nome (só leitura)
+            'disciplina', # ID da disciplina
+            'disciplina_nome', # Nome (só leitura)
+            'valor' # A nota
+        ]
+        
+        read_only_fields = ['aluno_nome', 'disciplina_nome']
