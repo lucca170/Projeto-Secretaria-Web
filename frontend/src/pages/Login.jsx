@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Certifique-se de importar axios
+
 // REMOVEMOS: useAuth
 // import { useNavigate } from 'react-router-dom'; // Já não precisa aqui
 import { Box, TextField, Button, Typography, Container } from '@mui/material';
@@ -13,20 +15,34 @@ function Login({ onLoginSuccess }) { // Recebe onLoginSuccess do App.jsx
     event.preventDefault();
     setError('');
     try {
-      // **** SIMULAÇÃO DE LOGIN ****
-      // SUBSTITUA pela sua chamada real à API de login depois
-      if (username === 'admin' && password === 'admin') { // Exemplo simples
-          console.log("Simulando login bem-sucedido...");
-          onLoginSuccess(); // Chama a função passada pelo App para marcar como logado
-          // O App.jsx vai cuidar do redirecionamento
-      } else {
-        setError('Usuário ou senha inválidos (teste: admin/admin).');
-      }
-      // **** FIM DA SIMULAÇÃO ****
+      // URL do seu endpoint de login customizado
+      const loginUrl = 'http://127.0.0.1:8000/api/login/'; // Ou a URL correta do seu backend
+
+      const response = await axios.post(loginUrl, {
+        username: username,
+        password: password,
+      });
+
+      // Assumindo que sua API retorna { token: '...', user: {...} }
+      const { token, user } = response.data;
+
+      // --- Gerenciamento de Autenticação ---
+      // 1. Armazene o token (localStorage é comum, mas considere segurança)
+      localStorage.setItem('authToken', token);
+      // 2. Armazene dados do usuário se necessário (opcional)
+      localStorage.setItem('userData', JSON.stringify(user));
+      // 3. Configure o header Authorization para futuras requisições Axios
+      axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+      // 4. Chame a função para atualizar o estado no App.jsx
+      onLoginSuccess();
 
     } catch (err) {
-      console.error("Erro na simulação de login:", err);
-      setError('Ocorreu um erro ao tentar fazer login.');
+      console.error("Erro no login:", err);
+      if (err.response && err.response.status === 400) {
+        setError('Usuário ou senha inválidos.');
+      } else {
+        setError('Ocorreu um erro ao tentar fazer login. Verifique a conexão ou as credenciais.');
+      }
     }
   };
 

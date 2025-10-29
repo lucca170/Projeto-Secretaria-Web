@@ -1,61 +1,65 @@
 import React from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom'; // Adiciona useNavigate
-import { AppBar, Toolbar, IconButton, Typography, Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
-// import MenuIcon from '@mui/icons-material/Menu';
+import { Outlet, Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Box, Button, Link as MuiLink } from '@mui/material';
 
-// REMOVEMOS: useAuth
-
-function Layout({ toggleTheme, onLogout }) { // Recebe onLogout do App.jsx
+function Layout({ toggleTheme, onLogout }) {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogoutClick = () => {
-    onLogout(); // Chama a função passada pelo App
-    navigate('/login'); // Redireciona para login após logout
+    onLogout();
+    navigate('/login');
   };
-
-  const drawerWidth = 240;
 
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Secretaria Web
-          </Typography>
-          {/* Adicione seu ThemeToggleButton aqui se tiver */}
-          <Button color="inherit" onClick={handleLogoutClick}>Logout</Button> {/* Chama handleLogoutClick */}
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          {/* Logo e Título */}
+          <Box sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }} component={RouterLink} to="/">
+            <img
+              src="/logo.png"
+              alt="SESI Garavelo Logo"
+              style={{
+                height: '40px',
+                marginRight: '12px',
+              }}
+            />
+            <Typography variant="h6" noWrap component="div">
+              SESI Garavelo
+            </Typography>
+          </Box>
+
+          {/* Links de Navegação */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
+            { [
+              { label: 'Dashboard', path: '/dashboard' },
+              { label: 'Alunos', path: '/alunos' },
+              { label: 'Calendário', path: '/calendario' },
+              { label: 'Eventos', path: '/eventos' },
+            ].map((item) => (
+              <MuiLink
+                key={item.label}
+                component={RouterLink}
+                to={item.path}
+                color="inherit"
+                underline={location.pathname === item.path ? 'always' : 'hover'}
+                sx={{ fontWeight: location.pathname === item.path ? 'bold' : 'normal' }}
+              >
+                {item.label}
+              </MuiLink>
+            ))}
+          </Box>
+
+          {/* Botões de Ação + Logout */}
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Button color="inherit" onClick={handleLogoutClick}>Logout</Button>
+          </Box>
         </Toolbar>
       </AppBar>
 
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            <ListItem button component={Link} to="/dashboard">
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <ListItem button component={Link} to="/alunos">
-              <ListItemText primary="Alunos" />
-            </ListItem>
-            <ListItem button component={Link} to="/calendario">
-              <ListItemText primary="Calendário" />
-            </ListItem>
-            <ListItem button component={Link} to="/eventos">
-              <ListItemText primary="Eventos" />
-            </ListItem>
-            {/* ADICIONAREMOS NOVOS LINKS AQUI */}
-          </List>
-        </Box>
-      </Drawer>
-
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      {/* Conteúdo Principal */}
+      <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: (theme) => theme.palette.background.default }}>
         <Toolbar />
         <Outlet />
       </Box>

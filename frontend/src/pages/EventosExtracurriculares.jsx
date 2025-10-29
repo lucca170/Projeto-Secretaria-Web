@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Typography, CircularProgress, Paper, List, ListItem, ListItemText, Button, Divider } from '@mui/material';
+import { Box, Typography, CircularProgress, Paper, List, ListItem, ListItemText, Button, Divider, Card, CardContent, CardActions } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom'; // Para o botão de inscrever
 
 function EventosExtracurriculares() {
@@ -103,38 +103,29 @@ function EventosExtracurriculares() {
             </Typography>
 
             {eventos.length > 0 ? (
-                <List>
+                <Box>
                     {eventos.map((evento) => (
-                        <React.Fragment key={evento.id}>
-                            <ListItem alignItems="flex-start">
-                                <ListItemText
-                                    primary={evento.nome}
-                                    secondary={
-                                        <>
-                                            <Typography component="span" variant="body2" color="text.primary">
-                                                Data: {new Date(evento.data).toLocaleDateString('pt-BR')} {/* Formata data */}
-                                            </Typography>
-                                            <br />
-                                            {evento.descricao}
-                                            <br />
-                                            Vagas: {evento.num_participantes ?? '?'} / {evento.vagas}
-                                        </>
-                                    }
-                                />
+                        <Card key={evento.id} sx={{ marginBottom: 2 }}>
+                            <CardContent>
+                                <Typography variant="h6">{evento.nome}</Typography>
+                                <Typography variant="body2" color="text.secondary" gutterBottom>
+                                    Data: {new Date(evento.data).toLocaleDateString('pt-BR')} | Vagas: {evento.num_participantes ?? '?'} / {evento.vagas}
+                                </Typography>
+                                <Typography variant="body1">{evento.descricao}</Typography>
+                            </CardContent>
+                            <CardActions sx={{ justifyContent: 'flex-end' }}>
                                 <Button
                                     variant={inscricaoStatus[evento.id] ? "outlined" : "contained"}
                                     color={inscricaoStatus[evento.id] ? "error" : "success"}
                                     onClick={() => handleInscricao(evento.id)}
                                     size="small"
-                                    sx={{ marginLeft: 2, alignSelf: 'center' }}
                                 >
                                     {inscricaoStatus[evento.id] ? 'Cancelar Inscrição' : 'Inscrever-se'}
                                 </Button>
-                            </ListItem>
-                            <Divider variant="inset" component="li" />
-                        </React.Fragment>
+                            </CardActions>
+                        </Card>
                     ))}
-                </List>
+                </Box>
             ) : (
                 <Typography variant="body1">Nenhum evento extracurricular disponível no momento.</Typography>
             )}

@@ -2,14 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import axios from 'axios'; // Mantenha este se já adicionou
 
-// Páginas Base (serão criadas a seguir)
+// Páginas Base
 import Login from './pages/Login';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Alunos from './pages/Alunos';
-import EventosExtracurriculares from './pages/EventosExtracurriculares'; // <-- ADICIONE
+import EventosExtracurriculares from './pages/EventosExtracurriculares';
 import CalendarioAcademico from './pages/CalendarioAcademico';
+import RelatorioAluno from './pages/RelatorioAluno'; // <-- ADICIONE ESTA LINHA
 
 // REMOVEMOS: useAuth e ProtectedRoute pois não temos useAuth.js
 
@@ -24,28 +26,87 @@ function App() {
     () =>
       createTheme({
         palette: {
-          mode,
+          mode, // Mantém a alternância light/dark
+          primary: {
+            main: '#101a8dff', // Verde principal
+            contrastText: '#ffffff',
+          },
+          secondary: {
+            main: '#FFC800', // Amarelo para contraste
+            contrastText: '#333333',
+          },
+          background: {
+            default: mode === 'light' ? '#f4f6f8' : '#121212',
+            paper: mode === 'light' ? '#ffffff' : '#1e1e1e',
+          },
+          text: {
+            primary: mode === 'light' ? '#333333' : '#e0e0e0',
+            secondary: mode === 'light' ? '#666666' : '#b0b0b0',
+          }
         },
+        typography: {
+          fontFamily: '"Poppins", Arial, sans-serif',
+          h4: {
+            fontWeight: 600,
+          },
+          // Outras customizações de tipografia podem ser adicionadas aqui
+        },
+        components: {
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                borderRadius: '20px',
+                textTransform: 'none',
+              },
+              containedPrimary: {
+                // Estilos específicos se necessário
+              },
+              outlinedPrimary: {
+                borderColor: '#ffffff',
+                color: '#ffffff',
+                '&:hover': {
+                  borderColor: '#dddddd',
+                  color: '#dddddd',
+                }
+              }
+            }
+          },
+          MuiAppBar: {
+            styleOverrides: {
+              root: {
+                backgroundColor: '#207ed6ff',
+                boxShadow: 'none',
+              }
+            }
+          },
+          // Adicione overrides para outros componentes se desejar
+        }
       }),
     [mode],
   );
 
-  // **** SIMULAÇÃO BÁSICA DE LOGIN ****
-  // Vamos usar um estado simples para saber se o usuário está "logado"
-  // SUBSTITUA ISSO pela sua lógica real com useAuth.js depois
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('isSimulatedLoggedIn')); // Verifica se já simulamos login
+  // Atualize a lógica de login para usar o token do localStorage
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+      return true;
+    }
+    return false;
+  });
 
   const handleLoginSuccess = () => {
-    localStorage.setItem('isSimulatedLoggedIn', 'true'); // Marca como logado no localStorage
+    // O token já foi setado no header pelo Login.jsx
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isSimulatedLoggedIn'); // Remove a marca
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    delete axios.defaults.headers.common['Authorization'];
     setIsLoggedIn(false);
-    // Idealmente, redirecionar para /login aqui, mas pode ser feito no Layout
+    // O navigate('/login') pode ficar no Layout.jsx ou aqui
   };
-  // **** FIM DA SIMULAÇÃO ****
 
   return (
     <ThemeProvider theme={theme}>

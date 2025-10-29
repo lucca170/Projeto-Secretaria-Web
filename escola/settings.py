@@ -35,6 +35,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Endereço padrão do Vite
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
