@@ -34,14 +34,16 @@ from escola.disciplinar.models import Advertencia, Suspensao
 
 # --- Views de Template (as que você já tinha) ---
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def adicionar_turma(request):
     if request.method == 'POST':
         # Implementar lógica de adicionar turma
         pass
     return render(request, 'pedagogico/adicionar_turma.html')
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def listar_turmas(request):
     turmas = Turma.objects.all()
     return render(request, 'pedagogico/listar_turmas.html', {'turmas': turmas})
@@ -141,7 +143,8 @@ def relatorio_desempenho_aluno(request, aluno_id):
 
     return JsonResponse(context)
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def relatorio_geral_faltas(request):
     """
     Implementa: 'Gerar relatórios de faltas.'
@@ -223,7 +226,8 @@ def calendario_academico(request):
         'eventos_json': json.dumps(eventos_formatados)
     })
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def planos_de_aula_professor(request):
     """
     Implementa: 'Agenda de Professores' e 'planejamento semanal de aula'
@@ -246,7 +250,8 @@ def planos_de_aula_professor(request):
     # Template: 'pedagogico/agenda_professor.html'
     return render(request, 'pedagogico/agenda_professor.html', context)
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def download_boletim_pdf(request, aluno_id):
     """
     Implementa: 'Permitir que alunos... possam baixar um relatório'
@@ -300,7 +305,8 @@ def download_boletim_pdf(request, aluno_id):
 
 # --- VIEWS DE INSCRIÇÃO EM EVENTOS (ADICIONADAS) ---
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def listar_eventos_extracurriculares(request):
     """
     Implementa: 'Calendário de eventos... onde os alunos possam se inscrever'

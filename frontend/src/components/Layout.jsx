@@ -59,7 +59,14 @@ function Layout({ toggleTheme, onLogout }) {
       </AppBar>
 
       {/* Conteúdo Principal */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: (theme) => theme.palette.background.default }}>
+      <Box 
+        component="main" 
+        sx={{ 
+          flexGrow: 1, 
+          p: 0 // <-- MUDEI DE 'p: 3' PARA 'p: 0'
+          // A LINHA 'backgroundColor: ...' FOI REMOVIDA
+        }}
+      >
         <Toolbar />
         <Outlet />
       </Box>
