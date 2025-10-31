@@ -16,14 +16,7 @@ function CalendarioAcademico() {
         const apiUrl = 'http://127.0.0.1:8000/pedagogico/calendario/'; 
 
         // Tenta buscar os eventos
-        axios.get(apiUrl, { 
-                 // Se sua view exigir autenticação, você precisará enviar o token/cookie
-                 // Exemplo com localStorage (adapte à sua lógica real de auth):
-                 // headers: {
-                 //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}` 
-                 // },
-                 withCredentials: true // Importante se usar cookies/sessões CSRF do Django
-             })
+        axios.get(apiUrl)
             .then(response => {
                 // A view Django retorna { eventos_json: "..." }
                 try {

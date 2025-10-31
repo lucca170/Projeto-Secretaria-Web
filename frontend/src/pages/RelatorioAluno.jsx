@@ -23,28 +23,10 @@ function RelatorioAluno() {
         setLoading(true);
         setError(null);
 
-        axios.get(apiUrl, { withCredentials: true }) // Envia cookies de sessão
+        axios.get(apiUrl)
             .then(response => {
-                // A view Django renderiza um HTML, precisamos extrair os dados do contexto dela
-                // --- ATENÇÃO: Esta abordagem é SIMPLIFICADA ---
-                // Idealmente, a view Django deveria retornar JSON para o React.
-                // Como a view atual retorna HTML, vamos simular os dados aqui.
-                // --- VOCÊ PRECISARÁ AJUSTAR A VIEW DJANGO OU EXTRAIR OS DADOS ---
-                
-                // --- SIMULAÇÃO DE DADOS (Substitua pela lógica real) ---
-                console.warn("Usando dados simulados! Ajuste a view Django para retornar JSON.");
-                setAlunoData({
-                     // Extraia esses dados do response.data se a view retornar JSON
-                    aluno: { nome: `Aluno ${alunoId}`, turma: { nome: 'Turma Exemplo' }, status: 'Ativo' }, 
-                    medias_disciplinas: [
-                        { disciplina__nome: 'Matemática', media: 7.5 },
-                        { disciplina__nome: 'Português', media: 8.0 },
-                    ],
-                    faltas: { count: 5 }, // Supondo que a view envie a contagem
-                    presencas: { count: 95 }, // Supondo que a view envie a contagem
-                });
-                // --- FIM DA SIMULAÇÃO ---
-                
+                // Usar diretamente os dados da API
+                setAlunoData(response.data);
                 setLoading(false);
             })
             .catch(err => {

@@ -2,11 +2,14 @@
 import json
 import datetime
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required  # Mantido para views de template
 from django.db.models import Count, Avg, F
+from django.http import HttpResponse, JsonResponse
 
 # Imports do Rest Framework
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 # Imports do seu projeto
 from .serializers import NotaSerializer
@@ -25,8 +28,6 @@ from .models import (
     PlanoDeAula,
     EventoExtracurricular  # <-- ADICIONE ESTE
 )
-from django.http import HttpResponse
-from django.template.loader import render_to_string
 
 # IMPORTANTE: Precisamos buscar os dados do app 'disciplinar'
 from escola.disciplinar.models import Advertencia, Suspensao
@@ -103,33 +104,42 @@ class NotaViewSet(viewsets.ModelViewSet):
 
 # --- NOVAS VIEWS DE RELATÓRIO E AGENDA (adicionadas) ---
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def relatorio_desempenho_aluno(request, aluno_id):
     """
     Implementa: 'Adicionar gráficos e relatórios de desempenho por aluno'
     Gera relatório com notas, faltas e evolução do aluno.
+    [AGORA RETORNA JSON]
     """
     aluno = get_object_or_404(Aluno, id=aluno_id)
-    
-    # Recupera dados do aluno
+
     notas = Nota.objects.filter(aluno=aluno)
     faltas = Falta.objects.filter(aluno=aluno)
     presencas = Presenca.objects.filter(aluno=aluno)
-    
-    # Calcula médias por disciplina
+
     medias_disciplinas = notas.values('disciplina__nome').annotate(
         media=Avg('valor')
     )
-    
+
     context = {
-        'aluno': aluno,
-        'notas': notas,
-        'faltas': faltas,
-        'presencas': presencas,
-        'medias_disciplinas': medias_disciplinas,
+        'aluno': {
+            'nome': aluno.usuario.get_full_name() or aluno.usuario.username,
+            'turma': {
+                'nome': aluno.turma.nome
+            },
+            'status': aluno.get_status_display()
+        },
+        'medias_disciplinas': list(medias_disciplinas), 
+        'faltas': {
+            'count': faltas.count()
+        },
+        'presencas': {
+            'count': presencas.count()
+        }
     }
-    
-    return render(request, 'pedagogico/relatorio_desempenho.html', context)
+
+    return JsonResponse(context)
 
 @login_required
 def relatorio_geral_faltas(request):
@@ -191,14 +201,15 @@ def relatorio_gerencial(request):
     # Template: 'pedagogico/relatorio_gerencial.html'
     return render(request, 'pedagogico/relatorio_gerencial.html', context)
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def calendario_academico(request):
     """
     Implementa: 'Calendário Acadêmico'
-    Recomendação: Use FullCalendar.js no frontend para ler este JSON.
+    Retorna JSON para o frontend (FullCalendar.js).
     """
     eventos = EventoAcademico.objects.all()
-    
+
     eventos_formatados = []
     for evento in eventos:
         eventos_formatados.append({
@@ -207,12 +218,10 @@ def calendario_academico(request):
             'end': evento.data_fim.isoformat() if evento.data_fim else None,
             'description': evento.descricao,
         })
-    
-    context = {
+
+    return JsonResponse({
         'eventos_json': json.dumps(eventos_formatados)
-    }
-    # Template: 'pedagogico/calendario.html'
-    return render(request, 'pedagogico/calendario.html', context)
+    })
 
 @login_required
 def planos_de_aula_professor(request):
@@ -296,8 +305,9 @@ def listar_eventos_extracurriculares(request):
     """
     Implementa: 'Calendário de eventos... onde os alunos possam se inscrever'
     Lista todos os eventos com vagas disponíveis.
+    [AGORA RETORNA JSON]
     """
-    eventos = EventoExtracurricular.objects.filter(
+    eventos_qs = EventoExtracurricular.objects.filter(
         data__gte=datetime.date.today(),
         vagas__gt=0
     ).annotate(
@@ -308,28 +318,50 @@ def listar_eventos_extracurriculares(request):
     if hasattr(request.user, 'aluno_profile'):
         eventos_inscritos_ids = request.user.aluno_profile.eventoextracurricular_set.values_list('id', flat=True)
 
-    context = {
-        'eventos': eventos,
-        'eventos_inscritos_ids': eventos_inscritos_ids
-    }
-    return render(request, 'pedagogico/listar_eventos.html', context)
+    eventos_list = []
+    for evento in eventos_qs:
+        eventos_list.append({
+            'id': evento.id,
+            'nome': evento.nome,
+            'descricao': evento.descricao,
+            'data': evento.data.isoformat(),
+            'vagas': evento.vagas,
+            'num_participantes': evento.num_participantes
+        })
 
-@login_required
+    context = {
+        'eventos': eventos_list,
+        'eventos_inscritos_ids': list(eventos_inscritos_ids)
+    }
+    return JsonResponse(context)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def inscrever_evento(request, evento_id):
     """
     Processa a inscrição (ou desinscrição) de um aluno em um evento.
+    [AGORA RETORNA JSON]
     """
     if not hasattr(request.user, 'aluno_profile'):
-        return redirect('listar_eventos_extracurriculares')
+        return JsonResponse({'status': 'error', 'message': 'Usuário não é um aluno'}, status=403)
 
     evento = get_object_or_404(EventoExtracurricular, id=evento_id)
     aluno = request.user.aluno_profile
 
+    status_message = ''
+    inscrito = False
+
     if aluno in evento.participantes.all():
         evento.participantes.remove(aluno)
+        status_message = 'Inscrição cancelada'
+        inscrito = False
     else:
         num_participantes = evento.participantes.count()
         if num_participantes < evento.vagas:
             evento.participantes.add(aluno)
-            
-    return redirect('listar_eventos_extracurriculares')
+            status_message = 'Inscrito com sucesso'
+            inscrito = True
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Não há mais vagas'}, status=400)
+
+    return JsonResponse({'status': 'success', 'message': status_message, 'inscrito': inscrito})

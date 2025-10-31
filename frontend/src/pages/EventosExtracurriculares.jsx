@@ -16,37 +16,19 @@ function EventosExtracurriculares() {
 
     // Função para buscar os eventos
     const fetchEventos = () => {
-        const apiUrl = `${backendUrl}/pedagogico/eventos/`; // URL da view de listagem
-
+        const apiUrl = `${backendUrl}/pedagogico/eventos/`;
         setLoading(true);
         setError(null);
 
-        axios.get(apiUrl, { withCredentials: true }) // Envia cookies se houver
+        axios.get(apiUrl)
             .then(response => {
-                // --- ATENÇÃO: Verifique o formato da resposta do Django ---
-                // Assumindo que a view retorna um objeto com uma chave 'eventos'
-                // Se a view renderiza HTML, você precisará ajustá-la para retornar JSON.
-                // Exemplo: return JsonResponse({'eventos': list(eventos.values('id', 'nome', ...)), 'eventos_inscritos_ids': [...]})
+                setEventos(response.data.eventos || []); 
                 
-                // --- SIMULAÇÃO (Remova/Ajuste após confirmar a resposta da API) ---
-                if (!response.data || typeof response.data !== 'object' || !response.data.eventos) {
-                     console.warn("API não retornou JSON esperado, usando dados simulados.");
-                     setEventos([
-                         {id: 1, nome: 'Palestra de Tecnologia', data: '2025-11-15', descricao: 'Sobre novas techs.', vagas: 50, num_participantes: 10},
-                         {id: 2, nome: 'Workshop de React', data: '2025-11-20', descricao: 'Aprenda React Hooks.', vagas: 20, num_participantes: 18},
-                     ]);
-                     // Simula IDs inscritos
-                     // setInscricaoStatus({ 1: false, 2: true }); 
-                } else {
-                     setEventos(response.data.eventos || []); 
-                     // Marcar status inicial de inscrição (se a API retornar os IDs)
-                     const inscritosMap = {};
-                     (response.data.eventos_inscritos_ids || []).forEach(id => {
-                         inscritosMap[id] = true;
-                     });
-                     setInscricaoStatus(inscritosMap);
-                }
-                // --- FIM SIMULAÇÃO ---
+                const inscritosMap = {};
+                (response.data.eventos_inscritos_ids || []).forEach(id => {
+                    inscritosMap[id] = true;
+                });
+                setInscricaoStatus(inscritosMap);
                 
                 setLoading(false);
             })
@@ -70,12 +52,11 @@ function EventosExtracurriculares() {
     const handleInscricao = (eventoId) => {
         const apiUrl = `${backendUrl}/pedagogico/eventos/inscrever/${eventoId}/`;
         
-        // POST request para a view de inscrição (precisa de CSRF se não for API DRF)
-        axios.post(apiUrl, {}, { withCredentials: true }) // Envia POST vazio, Django usa a URL
+        axios.post(apiUrl, {})
              .then(response => {
-                 // Atualiza o status visualmente e busca novamente a lista para garantir consistência
-                 setInscricaoStatus(prev => ({ ...prev, [eventoId]: !prev[eventoId] }));
-                 fetchEventos(); // Recarrega a lista para atualizar contagem de vagas, etc.
+                 const { inscrito } = response.data;
+                 setInscricaoStatus(prev => ({ ...prev, [eventoId]: inscrito }));
+                 fetchEventos();
              })
              .catch(err => {
                   console.error("Erro ao inscrever/desinscrever:", err);
