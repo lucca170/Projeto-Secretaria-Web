@@ -15,10 +15,13 @@ CARGO_CHOICES = [
 class Usuario(AbstractUser):  
     cargo = models.CharField(max_length=50, choices=CARGO_CHOICES)
 
+    # --- ADICIONE ESTA LINHA ---
+    # Isso diz ao 'createsuperuser' para pedir o email e o cargo.
+    REQUIRED_FIELDS = ['email', 'cargo']
+    # ---------------------------
+
     def __str__(self):
         return self.username
-
-    # USERNAME_FIELD e REQUIRED_FIELDS já são definidos corretamente em AbstractUser
 
 # --- Notificações, Eventos e Materiais ---
 class Notificacao(models.Model):
