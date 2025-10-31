@@ -1,22 +1,22 @@
-# Imports do Django
 import json
 import datetime
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required  # Mantido para views de template
+from django.contrib.auth.decorators import login_required  
 from django.db.models import Count, Avg, F
 from django.http import HttpResponse, JsonResponse
 
 # Imports do Rest Framework
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action 
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response 
 
 # Imports do seu projeto
-from .serializers import NotaSerializer, EventoAcademicoSerializer
-from escola.base.permissions import IsProfessor, IsAluno, IsCoordenacao
+from .serializers import NotaSerializer, EventoAcademicoSerializer, AlunoSerializer, TurmaSerializer
+# --- IsCoordenacao já estava importado ---
+from escola.base.permissions import IsProfessor, IsAluno, IsCoordenacao 
 
 # --- Imports dos Models ---
-# Unificamos todos os imports de models para virem do lugar certo (.models)
 from .models import (
     Aluno, 
     Nota, 
@@ -27,35 +27,80 @@ from .models import (
     EventoAcademico, 
     PlanoDeAula,
     EventoExtracurricular,
-    EventoAcademico, 
 )
-
-# IMPORTANTE: Precisamos buscar os dados do app 'disciplinar'
 from escola.disciplinar.models import Advertencia, Suspensao
 
 class EventoAcademicoViewSet(viewsets.ModelViewSet):
-    """
-    API para criar, ver, editar e deletar Eventos Acadêmicos.
-    (Provas, trabalhos, feriados, etc.)
-    """
+    # ... (código existente, sem alteração)
     queryset = EventoAcademico.objects.all()
     serializer_class = EventoAcademicoSerializer
 
     def get_permissions(self):
-        """
-        Define quem pode fazer o quê.
-        """
-        # Ações de escrita (POST, PUT, PATCH, DELETE)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            # Apenas staff administrativo (Admin, Coordenador, Diretor, TI) pode criar/modificar
             permission_classes = [IsAuthenticated, IsCoordenacao]
-        
-        # Ações de leitura (GET - list, retrieve)
         else:
-            # Todos logados (incluindo alunos/professores) podem ver os eventos
             permission_classes = [IsAuthenticated]
-        
         return [permission() for permission in permission_classes]
+
+# --- ALTERAR O ALUNOVIEWSET ---
+# Mudar de ReadOnlyModelViewSet para ModelViewSet
+class AlunoViewSet(viewsets.ModelViewSet): 
+    """
+    API para listar, ver, criar e editar Alunos.
+    A criação/edição é restrita à Coordenação.
+    """
+    serializer_class = AlunoSerializer
+    
+    # get_queryset permanece o mesmo
+    def get_queryset(self):
+        return Aluno.objects.all().order_by('usuario__first_name', 'usuario__last_name')
+
+    # ADICIONAR ESTA FUNÇÃO
+    def get_permissions(self):
+        """ Restringe escrita para cargos superiores. """
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            # Apenas Admin, Coordenador, Diretor, TI
+            permission_classes = [IsAuthenticated, IsCoordenacao]
+        else:
+            # Todos logados (list, retrieve)
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+# --- ALTERAR O TURMAVIEWSET ---
+# Mudar de ReadOnlyModelViewSet para ModelViewSet
+class TurmaViewSet(viewsets.ModelViewSet):
+    """
+    API para listar, ver, criar e editar Turmas.
+    A criação/edição é restrita à Coordenação.
+    """
+    queryset = Turma.objects.all().order_by('nome')
+    serializer_class = TurmaSerializer
+
+    # ADICIONAR ESTA FUNÇÃO
+    def get_permissions(self):
+        """ Restringe escrita para cargos superiores. """
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            # Apenas Admin, Coordenador, Diretor, TI
+            permission_classes = [IsAuthenticated, IsCoordenacao]
+        else:
+            # Todos logados (list, retrieve)
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    # A @action customizada permanece a mesma
+    @action(detail=True, methods=['get'])
+    def detalhe_com_alunos(self, request, pk=None):
+        turma = self.get_object()
+        alunos_da_turma = turma.alunos.all().order_by('usuario__first_name', 'usuario__last_name')
+        
+        turma_data = TurmaSerializer(turma).data
+        alunos_data = AlunoSerializer(alunos_da_turma, many=True).data
+        
+        return Response({
+            'turma': turma_data,
+            'alunos': alunos_data
+        })
+
 
 # --- Views de Template (as que você já tinha) ---
 

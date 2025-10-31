@@ -1,5 +1,5 @@
 # Em: escola/pedagogico/serializers.py
-from .models import Nota, EventoAcademico
+from .models import Nota, EventoAcademico, Aluno, Turma 
 from rest_framework import serializers
 from .models import Nota
 
@@ -34,3 +34,28 @@ class EventoAcademicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventoAcademico
         fields = '__all__' # Serializa todos os campos do modelo       
+
+
+class AlunoSerializer(serializers.ModelSerializer):
+    """ Serializa o Aluno, puxando o nome do Usuario. """
+    nome = serializers.CharField(source='usuario.get_full_name', read_only=True)
+    turma_nome = serializers.CharField(source='turma.nome', read_only=True)
+
+    class Meta:
+        model = Aluno
+        # --- ALTERADO AQUI ---
+        # Adicionamos 'usuario' à lista para que possa ser enviado no POST
+        fields = ['id', 'usuario', 'nome', 'status', 'turma', 'turma_nome']
+        # 'nome' e 'turma_nome' continuam read_only
+        read_only_fields = ['nome', 'turma_nome']
+        # ---------------------
+
+class TurmaSerializer(serializers.ModelSerializer):
+    """ Serializa a Turma. """
+    turno_display = serializers.CharField(source='get_turno_display', read_only=True)
+    
+    class Meta:
+        model = Turma
+        # Este serializer já funciona para escrita (POST)
+        fields = ['id', 'nome', 'turno', 'turno_display']
+        read_only_fields = ['turno_display']

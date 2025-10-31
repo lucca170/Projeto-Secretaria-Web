@@ -4,6 +4,9 @@ from . import views
 
 router = DefaultRouter()
 router.register(r'eventos-academicos', views.EventoAcademicoViewSet, basename='eventoacademico')
+# --- ADICIONE ESTAS DUAS LINHAS ---
+router.register(r'alunos', views.AlunoViewSet, basename='aluno')
+router.register(r'turmas', views.TurmaViewSet, basename='turma')
 
 urlpatterns = [
     # API

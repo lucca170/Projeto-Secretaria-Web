@@ -35,6 +35,7 @@ function Layout({ toggleTheme, onLogout }) {
             { [
               { label: 'Dashboard', path: '/dashboard' },
               { label: 'Alunos', path: '/alunos' },
+              { label: 'Turmas', path: '/turmas' }, // <-- ADICIONADO
               { label: 'Calendário', path: '/calendario' },
               { label: 'Eventos', path: '/eventos' },
             ].map((item) => (
@@ -43,8 +44,10 @@ function Layout({ toggleTheme, onLogout }) {
                 component={RouterLink}
                 to={item.path}
                 color="inherit"
-                underline={location.pathname === item.path ? 'always' : 'hover'}
-                sx={{ fontWeight: location.pathname === item.path ? 'bold' : 'normal' }}
+                // --- ALTERADO ---
+                underline={location.pathname.startsWith(item.path) ? 'always' : 'hover'}
+                sx={{ fontWeight: location.pathname.startsWith(item.path) ? 'bold' : 'normal' }}
+                // --- FIM DA ALTERAÇÃO ---
               >
                 {item.label}
               </MuiLink>
