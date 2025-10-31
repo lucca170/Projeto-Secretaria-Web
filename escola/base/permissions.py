@@ -5,7 +5,6 @@ class IsProfessor(permissions.BasePermission):
     Permissão customizada para permitir acesso apenas a Professores.
     """
     def has_permission(self, request, view):
-        # CORREÇÃO: O campo no seu model é 'cargo'
         return request.user and request.user.is_authenticated and request.user.cargo == 'professor'
 
 class IsAluno(permissions.BasePermission):
@@ -13,13 +12,20 @@ class IsAluno(permissions.BasePermission):
     Permissão customizada para permitir acesso apenas a Alunos.
     """
     def has_permission(self, request, view):
-        # CORREÇÃO: O campo no seu model é 'cargo'
         return request.user and request.user.is_authenticated and request.user.cargo == 'aluno'
 
-class IsCoordenacao(permissions.BasePermission): # O nome da classe pode ficar
+class IsCoordenacao(permissions.BasePermission): 
     """
-    Permissão customizada para permitir acesso apenas ao Administrador.
+    Permissão customizada para permitir acesso à equipe administrativa.
+    (Modificado para incluir Administrador, Coordenador, Diretor e TI)
     """
     def has_permission(self, request, view):
-        # CORREÇÃO: O campo no seu model é 'cargo' e o valor é 'administrador'
-        return request.user and request.user.is_authenticated and request.user.cargo == 'administrador'
+        # Verifica se o usuário está logado
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # Lista de cargos permitidos
+        allowed_roles = ['administrador', 'coordenador', 'diretor', 'ti']
+        
+        # Retorna True se o cargo do usuário estiver na lista
+        return request.user.cargo in allowed_roles

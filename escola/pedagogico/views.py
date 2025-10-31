@@ -12,8 +12,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 # Imports do seu projeto
-from .serializers import NotaSerializer
-from escola.base.permissions import IsProfessor, IsAluno
+from .serializers import NotaSerializer, EventoAcademicoSerializer
+from escola.base.permissions import IsProfessor, IsAluno, IsCoordenacao
 
 # --- Imports dos Models ---
 # Unificamos todos os imports de models para virem do lugar certo (.models)
@@ -26,11 +26,36 @@ from .models import (
     Disciplina,
     EventoAcademico, 
     PlanoDeAula,
-    EventoExtracurricular  # <-- ADICIONE ESTE
+    EventoExtracurricular,
+    EventoAcademico, 
 )
 
 # IMPORTANTE: Precisamos buscar os dados do app 'disciplinar'
 from escola.disciplinar.models import Advertencia, Suspensao
+
+class EventoAcademicoViewSet(viewsets.ModelViewSet):
+    """
+    API para criar, ver, editar e deletar Eventos Acadêmicos.
+    (Provas, trabalhos, feriados, etc.)
+    """
+    queryset = EventoAcademico.objects.all()
+    serializer_class = EventoAcademicoSerializer
+
+    def get_permissions(self):
+        """
+        Define quem pode fazer o quê.
+        """
+        # Ações de escrita (POST, PUT, PATCH, DELETE)
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            # Apenas staff administrativo (Admin, Coordenador, Diretor, TI) pode criar/modificar
+            permission_classes = [IsAuthenticated, IsCoordenacao]
+        
+        # Ações de leitura (GET - list, retrieve)
+        else:
+            # Todos logados (incluindo alunos/professores) podem ver os eventos
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
 
 # --- Views de Template (as que você já tinha) ---
 

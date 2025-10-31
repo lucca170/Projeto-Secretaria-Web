@@ -1,5 +1,5 @@
 # Em: escola/pedagogico/serializers.py
-
+from .models import Nota, EventoAcademico
 from rest_framework import serializers
 from .models import Nota
 
@@ -29,3 +29,8 @@ class NotaSerializer(serializers.ModelSerializer):
         ]
         
         read_only_fields = ['aluno_nome', 'disciplina_nome']
+
+class EventoAcademicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventoAcademico
+        fields = '__all__' # Serializa todos os campos do modelo       

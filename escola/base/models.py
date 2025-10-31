@@ -7,13 +7,13 @@ CARGO_CHOICES = [
     ('professor', 'Professor'),
     ('aluno', 'Aluno'),
     ('administrador', 'Administrador'),
-    # ...adicione outros cargos se necessário...
+    ('coordenador', 'Coordenador'), # ADICIONADO
+    ('diretor', 'Diretor'),       # ADICIONADO
+    ('ti', 'TI'),
 ]
 
-class Usuario(AbstractUser):  # Altere para herdar de AbstractUser
+class Usuario(AbstractUser):  
     cargo = models.CharField(max_length=50, choices=CARGO_CHOICES)
-    # Os campos username, first_name, last_name, email, password, is_active, is_staff, date_joined já existem em AbstractUser
-    # Não é necessário redefini-los, apenas adicione campos extras como 'cargo'
 
     def __str__(self):
         return self.username

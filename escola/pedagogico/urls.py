@@ -1,7 +1,14 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 
+router = DefaultRouter()
+router.register(r'eventos-academicos', views.EventoAcademicoViewSet, basename='eventoacademico')
+
 urlpatterns = [
+    # API
+    path('api/', include(router.urls)),
+
     # URLs de Template
     path('turmas/adicionar/', views.adicionar_turma, name='adicionar_turma'),
     path('turmas/', views.listar_turmas, name='listar_turmas'),
