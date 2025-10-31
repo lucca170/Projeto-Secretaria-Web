@@ -241,15 +241,14 @@ def calendario_academico(request):
     eventos_formatados = []
     for evento in eventos:
         eventos_formatados.append({
+            'id': evento.id, # <--- ADICIONE ESTA LINHA
             'title': f"({evento.get_tipo_display()}) {evento.titulo}",
             'start': evento.data_inicio.isoformat(),
             'end': evento.data_fim.isoformat() if evento.data_fim else None,
             'description': evento.descricao,
         })
 
-    return JsonResponse({
-        'eventos_json': json.dumps(eventos_formatados)
-    })
+    return JsonResponse(eventos_formatados, safe=False)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

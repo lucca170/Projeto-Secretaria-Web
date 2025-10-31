@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import axios from 'axios'; // Mantenha este se já adicionou
 
+
 // Páginas Base
 import Login from './pages/Login';
 import Layout from './components/Layout';
@@ -11,7 +12,10 @@ import Dashboard from './pages/Dashboard';
 import Alunos from './pages/Alunos';
 import EventosExtracurriculares from './pages/EventosExtracurriculares';
 import CalendarioAcademico from './pages/CalendarioAcademico';
-import RelatorioAluno from './pages/RelatorioAluno'; // <-- ADICIONE ESTA LINHA
+import RelatorioAluno from './pages/RelatorioAluno'; 
+import AdicionarEvento from './pages/AdicionarEvento';
+import DetalheEvento from './pages/DetalheEvento';
+
 
 // REMOVEMOS: useAuth e ProtectedRoute pois não temos useAuth.js
 
@@ -126,6 +130,8 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="alunos" element={<Alunos />} />
             <Route path="calendario" element={<CalendarioAcademico />} />
+            <Route path="calendario/adicionar" element={<AdicionarEvento />} />
+            <Route path="calendario/evento/:eventoId" element={<DetalheEvento />} />
             <Route path="eventos" element={<EventosExtracurriculares />} />
             <Route path="relatorio/:alunoId" element={<RelatorioAluno />} />
             <Route path="relatorio/aluno/:alunoId" element={<RelatorioAluno />} />
