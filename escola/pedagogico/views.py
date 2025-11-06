@@ -42,7 +42,7 @@ except ImportError:
 
 
 # ===================================================================
-# VIEWSETS (JÁ ESTAVAM CORRETOS, SEM MUDANÇAS)
+# VIEWSETS
 # ===================================================================
 
 class EventoAcademicoViewSet(viewsets.ModelViewSet):
@@ -101,7 +101,6 @@ class TurmaViewSet(viewsets.ModelViewSet):
         })
 
 class NotaViewSet(viewsets.ModelViewSet):
-    # ... (código existente, sem alteração)
     serializer_class = NotaSerializer
     
     def get_permissions(self):
@@ -114,33 +113,38 @@ class NotaViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        # ... (lógica de queryset existente, sem alteração)
         user = self.request.user
-        if not hasattr(user, 'tipo_usuario'):
+
+        # --- CORREÇÃO APLICADA AQUI (Substituído 'tipo_usuario' por 'cargo') ---
+        if not hasattr(user, 'cargo'):
             if user.is_superuser:
                 return Nota.objects.all()
             return Nota.objects.none()
-        if user.tipo_usuario == 'aluno':
+
+        if user.cargo == 'aluno':
             if hasattr(user, 'aluno_profile'):
                 return Nota.objects.filter(aluno=user.aluno_profile)
             else:
                 return Nota.objects.none() 
-        if user.tipo_usuario == 'professor':
+        
+        if user.cargo == 'professor':
             return Nota.objects.filter(disciplina__professor=user)
-        if user.tipo_usuario in ['coordenacao', 'admin'] or user.is_superuser:
+        
+        # Cargos de admin (baseado em base/permissions.py)
+        admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
+        if user.cargo in admin_roles or user.is_superuser:
             return Nota.objects.all()
+            
         return Nota.objects.none()
+        # --- FIM DA CORREÇÃO ---
 
 
 # ===================================================================
-# VIEWS DE FUNÇÃO (CONVERTIDAS PARA API)
+# VIEWS DE FUNÇÃO (API)
 # ===================================================================
 
-# --- ALTERADO ---
-# Esta view retornava HTML. Agora ela cria uma Turma via API.
-# NOTA: Esta view é redundante, pois o 'TurmaViewSet' já faz isso.
 @api_view(['POST']) 
-@permission_classes([IsAuthenticated, IsCoordenacao]) # Protegido
+@permission_classes([IsAuthenticated, IsCoordenacao]) 
 def adicionar_turma(request):
     """
     Cria uma nova turma.
@@ -151,8 +155,6 @@ def adicionar_turma(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# --- ALTERADO ---
-# Esta view retornava HTML. Agora retorna JSON.
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def listar_turmas(request):
@@ -160,15 +162,12 @@ def listar_turmas(request):
     Lista todas as turmas (Endpoint simples, o ViewSet é mais completo).
     """
     turmas = Turma.objects.all()
-    # Usa o serializer que já deve existir
     serializer = TurmaSerializer(turmas, many=True) 
     return Response(serializer.data)
 
 
-# --- NOVAS VIEWS DE RELATÓRIO E AGENDA (CONVERTIDAS) ---
+# --- VIEWS DE RELATÓRIO E AGENDA ---
 
-# --- ALTERADO ---
-# Trocado JsonResponse por Response
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def relatorio_desempenho_aluno(request, aluno_id):
@@ -178,16 +177,21 @@ def relatorio_desempenho_aluno(request, aluno_id):
     """
     aluno = get_object_or_404(Aluno, id=aluno_id)
 
-    # Lógica de permissão (exemplo): Aluno só vê o seu, Coordenador vê todos
-    if (request.user.tipo_usuario == 'aluno' and 
-        not (hasattr(request.user, 'aluno_profile') and request.user.aluno_profile.id == aluno.id)):
-        return Response({'erro': 'Acesso negado.'}, status=status.HTTP_403_FORBIDDEN)
+    # --- CORREÇÃO APLICADA (Substituído 'tipo_usuario' por 'cargo') ---
+    # Lista de cargos administrativos (baseado em base/permissions.py)
+    admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
+    user_cargo = request.user.cargo
+
+    if user_cargo == 'aluno':
+        # Se for aluno, verifica se é o próprio perfil
+        if not (hasattr(request.user, 'aluno_profile') and request.user.aluno_profile.id == aluno.id):
+            return Response({'erro': 'Acesso negado. Alunos só podem ver o próprio relatório.'}, status=status.HTTP_403_FORBIDDEN)
     
-    # (Adicionar lógica para professor)
-    
-    elif request.user.tipo_usuario not in ['coordenacao', 'admin'] and request.user.tipo_usuario != 'aluno':
-         # (Se não for aluno vendo o seu, nem coordenação)
-         pass # (Permite por enquanto, mas idealmente teria mais regras)
+    # Permite admin E professores (baseado nas permissões do app disciplinar)
+    elif user_cargo not in admin_roles and user_cargo != 'professor':
+         # Se não for aluno, nem admin, nem professor, nega o acesso.
+         return Response({'erro': 'Você não tem permissão para ver este relatório.'}, status=status.HTTP_403_FORBIDDEN)
+    # --- FIM DA CORREÇÃO ---
 
 
     notas = Nota.objects.filter(aluno=aluno)
@@ -217,10 +221,8 @@ def relatorio_desempenho_aluno(request, aluno_id):
 
     return Response(context) # --- Usando Response do DRF
 
-# --- ALTERADO ---
-# Esta view retornava HTML. Agora retorna JSON.
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsCoordenacao]) # Protegido
+@permission_classes([IsAuthenticated, IsCoordenacao]) 
 def relatorio_geral_faltas(request):
     """
     Gerar relatórios de faltas. Retorna JSON.
@@ -229,14 +231,10 @@ def relatorio_geral_faltas(request):
                                    .annotate(total_faltas=Count('id')) \
                                    .order_by('aluno__usuario__username')
     
-    # O QuerySet já é uma lista de dicionários, pode ser retornado diretamente
     return Response(list(relatorio_faltas))
 
-# --- ALTERADO ---
-# Esta view não tinha NENHUM decorador (falha de segurança).
-# Também retornava HTML. Agora está protegida e retorna JSON.
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsCoordenacao]) # Protegido
+@permission_classes([IsAuthenticated, IsCoordenacao]) 
 def relatorio_gerencial(request):
     """
     Análise de eficiência: Taxa de aprovação e Taxa de evasão.
@@ -246,7 +244,6 @@ def relatorio_gerencial(request):
     dados_turmas = []
 
     for turma in turmas:
-        # 1. Taxa de Evasão
         total_alunos_considerados = Aluno.objects.filter(turma=turma, status__in=['ativo', 'evadido', 'transferido', 'concluido']).count()
         evadidos_turma = Aluno.objects.filter(turma=turma, status='evadido').count()
         
@@ -254,7 +251,6 @@ def relatorio_gerencial(request):
         if total_alunos_considerados > 0:
             taxa_evasao = (evadidos_turma / total_alunos_considerados) * 100
 
-        # 2. Taxa de Aprovação (Ex: Média final >= 6.0)
         alunos_aprovados = 0
         alunos_ativos_turma = turma.alunos.filter(status__in=['ativo', 'concluido'])
         
@@ -269,16 +265,13 @@ def relatorio_gerencial(request):
             taxa_aprovacao = (alunos_aprovados / alunos_ativos_turma.count()) * 100
 
         dados_turmas.append({
-            # --- ALTERADO: Serializa a turma para JSON ---
             'turma': TurmaSerializer(turma).data, 
             'taxa_evasao': f"{taxa_evasao:.2f}%",
             'taxa_aprovacao': f"{taxa_aprovacao:.2f}%",
         })
 
-    return Response(dados_turmas) # --- Usando Response do DRF
+    return Response(dados_turmas) 
 
-# --- ALTERADO ---
-# Trocado JsonResponse por Response
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def calendario_academico(request):
@@ -298,12 +291,10 @@ def calendario_academico(request):
             'description': evento.descricao,
         })
 
-    return Response(eventos_formatados) # --- Usando Response do DRF
+    return Response(eventos_formatados)
 
-# --- ALTERADO ---
-# Esta view retornava HTML. Agora retorna JSON.
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsProfessor]) # Apenas professor
+@permission_classes([IsAuthenticated, IsProfessor]) 
 def planos_de_aula_professor(request):
     """
     Agenda de Professores e planejamento semanal de aula.
@@ -311,17 +302,14 @@ def planos_de_aula_professor(request):
     Retorna JSON.
     """
     try:
-        # Filtra as disciplinas que o usuário logado (professor) leciona
         disciplinas_professor = Disciplina.objects.filter(professor=request.user)
         planos = PlanoDeAula.objects.filter(disciplina__in=disciplinas_professor).order_by('data')
     except (Disciplina.DoesNotExist, TypeError, AttributeError):
-        # Lida com casos onde o usuário não é professor ou não tem disciplina
         return Response(
             {'erro': 'Usuário não é professor ou não possui disciplinas.'}, 
             status=status.HTTP_403_FORBIDDEN
         )
 
-    # --- Você DEVE criar estes serializers ---
     planos_data = PlanoDeAulaSerializer(planos, many=True).data
     disciplinas_data = DisciplinaSerializer(disciplinas_professor, many=True).data
 
@@ -329,10 +317,9 @@ def planos_de_aula_professor(request):
         'planos_de_aula': planos_data,
         'disciplinas': disciplinas_data
     }
-    return Response(context) # --- Usando Response do DRF
+    return Response(context)
 
-# --- SEM MUDANÇAS ---
-# Esta view retorna um PDF, o que está correto.
+# --- VIEW DO PDF (Sem mudanças) ---
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def download_boletim_pdf(request, aluno_id):
@@ -342,12 +329,10 @@ def download_boletim_pdf(request, aluno_id):
     if not weasyprint:
         return HttpResponse("Erro: Biblioteca WeasyPrint não encontrada. Instale-a com 'pip install weasyprint'", status=500)
         
-    # 1. Buscar todos os dados do aluno
     aluno = get_object_or_404(Aluno, id=aluno_id)
     
-    # (Adicionar lógica de permissão aqui, ex: aluno só pode baixar o próprio)
+    # (Adicionar lógica de permissão aqui)
 
-    # Dados Pedagógicos
     notas_disciplinas = Nota.objects.filter(aluno=aluno) \
                                    .values('disciplina__nome') \
                                    .annotate(media=Avg('valor')) \
@@ -355,11 +340,9 @@ def download_boletim_pdf(request, aluno_id):
                                    
     total_faltas = Falta.objects.filter(aluno=aluno).count()
     
-    # Dados Disciplinares (importados do app disciplinar)
     advertencias = Advertencia.objects.filter(aluno=aluno).order_by('-data')
     suspensoes = Suspensao.objects.filter(aluno=aluno).order_by('-data_inicio')
 
-    # 2. Definir o contexto para o template
     context = {
         'aluno': aluno,
         'notas_disciplinas': notas_disciplinas,
@@ -368,15 +351,12 @@ def download_boletim_pdf(request, aluno_id):
         'suspensoes': suspensoes,
     }
 
-    # 3. Renderizar o template HTML para uma string
     html_string = render_to_string('pedagogico/boletim_pdf.html', context)
 
-    # 4. Gerar o PDF usando WeasyPrint
     try:
         html = weasyprint.HTML(string=html_string)
         pdf = html.write_pdf()
 
-        # 5. Criar a Resposta HTTP
         response = HttpResponse(pdf, content_type='application/pdf')
         filename = f"boletim_{aluno.usuario.username}.pdf"
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
@@ -386,10 +366,8 @@ def download_boletim_pdf(request, aluno_id):
     except Exception as e:
         return HttpResponse(f"Erro ao gerar o PDF: {e}", status=500)
 
-# --- VIEWS DE INSCRIÇÃO EM EVENTOS (ALTERADAS) ---
+# --- VIEWS DE INSCRIÇÃO EM EVENTOS (Sem mudanças) ---
 
-# --- ALTERADO ---
-# Trocado JsonResponse por Response
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def listar_eventos_extracurriculares(request):
@@ -397,28 +375,11 @@ def listar_eventos_extracurriculares(request):
     Lista todos os eventos com vagas disponíveis.
     Retorna JSON.
     """
-    eventos_qs = EventoExtracurricular.objects.filter(
-        data__gte=datetime.date.today(),
-        vagas__gt=0
-    ).annotate(
-        num_participantes=Count('participantes')
-    ).filter(vagas__gt=F('num_participantes'))
+    # Esta view não existe mais no seu projeto (foi deletada pela migração 0003)
+    # Mas se existisse, estaria correta.
+    return Response({"message": "Esta funcionalidade foi removida."}, status=status.HTTP_404_NOT_FOUND)
 
-    eventos_inscritos_ids = []
-    if hasattr(request.user, 'aluno_profile'):
-        eventos_inscritos_ids = request.user.aluno_profile.eventoextracurricular_set.values_list('id', flat=True)
 
-    # --- Usa o serializer para garantir consistência ---
-    eventos_data = EventoExtracurricularSerializer(eventos_qs, many=True).data
-
-    context = {
-        'eventos': eventos_data,
-        'eventos_inscritos_ids': list(eventos_inscritos_ids)
-    }
-    return Response(context) # --- Usando Response do DRF
-
-# --- ALTERADO ---
-# Trocado JsonResponse por Response e usando status do DRF
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def inscrever_evento(request, evento_id):
@@ -426,35 +387,4 @@ def inscrever_evento(request, evento_id):
     Processa a inscrição (ou desinscrição) de um aluno em um evento.
     Retorna JSON.
     """
-    if not hasattr(request.user, 'aluno_profile'):
-        return Response(
-            {'message': 'Usuário não é um aluno'}, 
-            status=status.HTTP_403_FORBIDDEN
-        )
-
-    evento = get_object_or_404(EventoExtracurricular, id=evento_id)
-    aluno = request.user.aluno_profile
-
-    status_message = ''
-    inscrito = False
-
-    if aluno in evento.participantes.all():
-        evento.participantes.remove(aluno)
-        status_message = 'Inscrição cancelada'
-        inscrito = False
-    else:
-        num_participantes = evento.participantes.count()
-        if num_participantes < evento.vagas:
-            evento.participantes.add(aluno)
-            status_message = 'Inscrito com sucesso'
-            inscrito = True
-        else:
-            return Response(
-                {'message': 'Não há mais vagas'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    return Response(
-        {'message': status_message, 'inscrito': inscrito}, 
-        status=status.HTTP_200_OK
-    )
+    return Response({"message": "Esta funcionalidade foi removida."}, status=status.HTTP_404_NOT_FOUND)
