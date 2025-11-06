@@ -1,0 +1,32 @@
+{% extends 'base/base.html' %} {% block content %} <div class="container">
+    <h1>Relatório de Desempenho</h1>
+
+    <h2>Aluno: {{ aluno.usuario.get_full_name }}</h2>
+    <p>Turma: {{ aluno.turma.nome }}</p>
+    <p>Status: {{ aluno.get_status_display }}</p>
+
+    <a href="{% url 'download_boletim_pdf' aluno.id %}" target="_blank" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
+        Baixar Relatório Completo em PDF
+    </a>
+
+    <hr style="margin-top: 20px;">
+
+    <h3>Médias por Disciplina</h3>
+    {% if medias_disciplinas %}
+        <ul>
+            {% for item in medias_disciplinas %}
+                <li>{{ item.disciplina__nome }}: <strong>{{ item.media|floatformat:2 }}</strong></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nenhuma nota encontrada.</p>
+    {% endif %}
+
+    <h3>Faltas</h3>
+    <p>Total de faltas: {{ faltas.count }}</p>
+
+    <h3>Presenças</h3>
+    <p>Total de presenças: {{ presencas.count }}</p>
+
+</div>
+{% endblock %} ```

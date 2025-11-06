@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-R">
+    <title>Boletim Acadêmico</title>
+    <style>
+        /* Estilos CSS para o seu PDF */
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #003366;
+            border-bottom: 2px solid #003366;
+            padding-bottom: 10px;
+        }
+        h2 {
+            font-size: 16px;
+            color: #003366;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        .info-aluno {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .info-aluno p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .info-aluno strong {
+            color: #000;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #003366;
+            color: white;
+            font-size: 13px;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .empty-state {
+            text-align: center;
+            color: #777;
+            padding: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Boletim de Desempenho Acadêmico</h1>
+        
+        <div class="info-aluno">
+            <p><strong>Aluno:</strong> {{ aluno.usuario.get_full_name }}</p>
+            <p><strong>Turma:</strong> {{ aluno.turma.nome }} ({{ aluno.turma.get_turno_display }})</p>
+            <p><strong>Status:</strong> {{ aluno.get_status_display }}</p>
+        </div>
+
+        <h2>Desempenho Acadêmico (Médias)</h2>
+        {% if notas_disciplinas %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Disciplina</th>
+                        <th>Média Final</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in notas_disciplinas %}
+                    <tr>
+                        <td>{{ item.disciplina__nome }}</td>
+                        <td>{{ item.media|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty-state">Nenhuma nota registrada.</p>
+        {% endif %}
+
+        <h2>Frequência</h2>
+        <p style="font-size: 14px;">Total de Faltas Registradas: <strong>{{ total_faltas }}</strong></p>
+
+        <h2>Histórico Disciplinar: Advertências</h2>
+        {% if advertencias %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for adv in advertencias %}
+                    <tr>
+                        <td>{{ adv.data|date:"d/m/Y" }}</td>
+                        <td>{{ adv.motivo }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty-state">Nenhuma advertência registrada.</p>
+        {% endif %}
+        
+        <h2>Histórico Disciplinar: Suspensões</h2>
+        {% if suspensoes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for susp in suspensoes %}
+                    <tr>
+                        <td>{{ susp.data_inicio|date:"d/m/Y" }} a {{ susp.data_fim|date:"d/m/Y" }}</td>
+                        <td>{{ susp.motivo }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty-state">Nenhuma suspensão registrada.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
