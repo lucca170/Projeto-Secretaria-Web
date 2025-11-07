@@ -19,15 +19,17 @@ import DetalheTurma from './pages/DetalheTurma';
 import AdicionarTurma from './pages/AdicionarTurma';
 import AdicionarAluno from './pages/AdicionarAluno';
 
-// --- IMPORTS DA BIBLIOTECA ATUALIZADOS ---
+// Imports da Biblioteca
 import ListaLivros from './pages/ListaLivros';
 import MeusEmprestimos from './pages/MeusEmprestimos';
-import AdicionarLivro from './pages/AdicionarLivro'; // <-- NOVO
-import EditarLivro from './pages/EditarLivro';     // <-- NOVO
-// ----------------------------------------
+import AdicionarLivro from './pages/AdicionarLivro';
+import EditarLivro from './pages/EditarLivro';    
+
+// --- NOVO IMPORT ---
+import LancarNotas from './pages/LancarNotas';
 
 function App() {
-  // ... (lógica existente: theme, login, logout...)
+  // ... (lógica de tema e login/logout existente)
   const [mode, setMode] = useState('light');
 
   const toggleTheme = () => {
@@ -37,7 +39,6 @@ function App() {
   const theme = useMemo(
     () =>
       createTheme({
-        // ... (seu tema existente)
         palette: {
           mode, 
           primary: { main: '#101a8dff', contrastText: '#ffffff', },
@@ -104,12 +105,14 @@ function App() {
             <Route path="calendario/adicionar" element={<AdicionarEvento />} />
             <Route path="calendario/evento/:eventoId" element={<DetalheEvento />} />
             
-            {/* --- ROTAS DA BIBLIOTECA ATUALIZADAS --- */}
+            {/* --- ROTAS DA BIBLIOTECA --- */}
             <Route path="biblioteca" element={<ListaLivros />} />
             <Route path="biblioteca/meus-emprestimos" element={<MeusEmprestimos />} />
             <Route path="biblioteca/adicionar-livro" element={<AdicionarLivro />} />
             <Route path="biblioteca/livro/:livroId" element={<EditarLivro />} /> 
-            {/* ------------------------------------- */}
+            
+            {/* --- ROTAS DE PROFESSOR --- */}
+            <Route path="professor/lancar-notas" element={<LancarNotas />} />
 
             {/* --- ROTAS DE RELATÓRIO --- */}
             <Route path="relatorio/aluno/:alunoId" element={<RelatorioAluno />} />

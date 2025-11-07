@@ -1,8 +1,12 @@
-# escola/base/admin.py
+# escola/coordenacao/admin.py
 from django.contrib import admin
 from .models import (
-    Colaborador, EventoCalendario, Notificacao,
-    MaterialDidatico, SalaLaboratorio, ReservaSala
+    Colaborador, 
+    # EventoCalendario e Notificacao removidos daqui
+    MaterialDidatico, 
+    SalaLaboratorio, 
+    ReservaSala,
+    RelatorioGerencial # Adicionado para garantir
 )
 
 @admin.register(Colaborador)
@@ -10,17 +14,8 @@ class ColaboradorAdmin(admin.ModelAdmin):
     list_display = ('nome', 'cpf', 'cargo')
     search_fields = ('nome', 'cpf')
 
-@admin.register(EventoCalendario)
-class EventoCalendarioAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'data_inicio', 'data_fim', 'tipo')
-    search_fields = ('titulo', 'descricao')
-    list_filter = ('tipo', 'data_inicio')
-
-@admin.register(Notificacao)
-class NotificacaoAdmin(admin.ModelAdmin):
-    list_display = ('destinatario', 'titulo', 'data_envio', 'lida')
-    search_fields = ('destinatario', 'titulo')
-    list_filter = ('lida', 'data_envio')
+# REMOVIDO: O @admin.register(EventoCalendario)
+# REMOVIDO: O @admin.register(Notificacao)
 
 @admin.register(MaterialDidatico)
 class MaterialDidaticoAdmin(admin.ModelAdmin):
@@ -36,5 +31,11 @@ class SalaLaboratorioAdmin(admin.ModelAdmin):
 @admin.register(ReservaSala)
 class ReservaSalaAdmin(admin.ModelAdmin):
     list_display = ('sala', 'usuario', 'data_inicio', 'data_fim')
-    search_fields = ('sala__nome', 'usuario')
+    search_fields = ('sala__nome', 'usuario__username') # Atualizado para buscar no FK
     list_filter = ('data_inicio', 'data_fim')
+
+# ADICIONADO: Registro do RelatorioGerencial que faltava
+@admin.register(RelatorioGerencial)
+class RelatorioGerencialAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'tipo', 'data_geracao')
+    list_filter = ('tipo',)

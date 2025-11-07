@@ -3,25 +3,22 @@ import json
 import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Avg, F
-from django.template.loader import render_to_string # Mantido para o PDF
-from django.http import HttpResponse # Mantido para o PDF
+from django.template.loader import render_to_string 
+from django.http import HttpResponse 
 
-# Imports do Rest Framework
-from rest_framework import viewsets, permissions, status # --- ADICIONADO status ---
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action 
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response # --- ESTE É O IMPORT CORRETO ---
+from rest_framework.response import Response 
 
-# Imports do seu projeto
 from .serializers import (
     NotaSerializer, EventoAcademicoSerializer, 
     AlunoSerializer, TurmaSerializer, AlunoCreateSerializer,
-    # --- ADICIONADOS (você precisará criá-los) ---
-    PlanoDeAulaSerializer, DisciplinaSerializer
+    PlanoDeAulaSerializer, DisciplinaSerializer,
+    NotaCreateUpdateSerializer # --- NOVO ---
 )
 from escola.base.permissions import IsProfessor, IsAluno, IsCoordenacao 
 
-# Imports dos Models
 from .models import (
     Aluno, 
     Nota, 
@@ -34,19 +31,47 @@ from .models import (
 )
 from escola.disciplinar.models import Advertencia, Suspensao
 
-# --- Imports para o PDF (Verifique se 'weasyprint' está instalado) ---
 try:
     import weasyprint
 except ImportError:
-    weasyprint = None # Opcional: lidar com a falha de importação
-
+    weasyprint = None 
 
 # ===================================================================
 # VIEWSETS
 # ===================================================================
 
+# --- NOVO VIEWSET ---
+class DisciplinaViewSet(viewsets.ModelViewSet):
+    """
+    API para Disciplinas.
+    Professores podem ver apenas suas próprias disciplinas.
+    Coordenação pode ver todas.
+    """
+    serializer_class = DisciplinaSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        if not hasattr(user, 'cargo'):
+            return Disciplina.objects.none()
+
+        if user.cargo == 'professor':
+            return Disciplina.objects.filter(professor=user)
+        
+        admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
+        if user.cargo in admin_roles or user.is_superuser:
+            return Disciplina.objects.all()
+            
+        return Disciplina.objects.none()
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            permission_classes = [IsAuthenticated, IsCoordenacao]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
 class EventoAcademicoViewSet(viewsets.ModelViewSet):
-    # ... (código existente, sem alteração)
     queryset = EventoAcademico.objects.all()
     serializer_class = EventoAcademicoSerializer
 
@@ -58,7 +83,6 @@ class EventoAcademicoViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 class AlunoViewSet(viewsets.ModelViewSet): 
-    # ... (código existente, sem alteração)
     def get_queryset(self):
         return Aluno.objects.all().order_by('usuario__first_name', 'usuario__last_name')
 
@@ -75,7 +99,6 @@ class AlunoViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 class TurmaViewSet(viewsets.ModelViewSet):
-    # ... (código existente, sem alteração)
     queryset = Turma.objects.all().order_by('nome')
     serializer_class = TurmaSerializer
 
@@ -88,9 +111,12 @@ class TurmaViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def detalhe_com_alunos(self, request, pk=None):
-        # ... (código existente, sem alteração)
         turma = self.get_object()
-        alunos_da_turma = turma.alunos.all().order_by('usuario__first_name', 'usuario__last_name')
+        # --- ATUALIZADO: Busca alunos pela turma e filtra por status ativo ---
+        alunos_da_turma = Aluno.objects.filter(
+            turma=turma, 
+            status='ativo'
+        ).order_by('usuario__first_name', 'usuario__last_name')
         
         turma_data = TurmaSerializer(turma).data
         alunos_data = AlunoSerializer(alunos_da_turma, many=True).data
@@ -100,99 +126,134 @@ class TurmaViewSet(viewsets.ModelViewSet):
             'alunos': alunos_data
         })
 
+# --- VIEWSET DE NOTAS ATUALIZADO E CORRIGIDO ---
 class NotaViewSet(viewsets.ModelViewSet):
-    serializer_class = NotaSerializer
+    
+    def get_serializer_class(self):
+        # Usa um serializer simples para criar/atualizar
+        if self.action in ['create', 'update', 'partial_update']:
+            return NotaCreateUpdateSerializer
+        # E um serializer completo para listar/ver
+        return NotaSerializer
     
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+        # Apenas professores podem criar/editar/deletar notas
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'bulk_update_notas']:
             permission_classes = [permissions.IsAuthenticated, IsProfessor]
+        # Alunos, Professores e Admins podem ver
         elif self.action in ['list', 'retrieve']:
-            permission_classes = [permissions.IsAuthenticated, (IsProfessor | IsAluno)]
+            permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         user = self.request.user
+        queryset = Nota.objects.all()
 
-        # --- CORREÇÃO APLICADA AQUI (Substituído 'tipo_usuario' por 'cargo') ---
         if not hasattr(user, 'cargo'):
-            if user.is_superuser:
-                return Nota.objects.all()
             return Nota.objects.none()
 
+        # Filtros da Query String (usados pelo frontend de "Lançar Notas")
+        disciplina_id = self.request.query_params.get('disciplina_id')
+        aluno_id = self.request.query_params.get('aluno_id')
+
+        if disciplina_id:
+            queryset = queryset.filter(disciplina_id=disciplina_id)
+        if aluno_id:
+             queryset = queryset.filter(aluno_id=aluno_id)
+
+        # Filtros de Permissão
         if user.cargo == 'aluno':
             if hasattr(user, 'aluno_profile'):
-                return Nota.objects.filter(aluno=user.aluno_profile)
+                return queryset.filter(aluno=user.aluno_profile)
             else:
                 return Nota.objects.none() 
         
         if user.cargo == 'professor':
-            return Nota.objects.filter(disciplina__professor=user)
+            # Professor só vê notas das disciplinas que ele leciona
+            return queryset.filter(disciplina__professor=user)
         
-        # Cargos de admin (baseado em base/permissions.py)
         admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
         if user.cargo in admin_roles or user.is_superuser:
-            return Nota.objects.all()
+            return queryset # Admins veem tudo (respeitando os filtros da query)
             
         return Nota.objects.none()
-        # --- FIM DA CORREÇÃO ---
+
+    @action(detail=False, methods=['post'], permission_classes=[IsProfessor])
+    def bulk_update_notas(self, request):
+        """
+        Ação customizada para o professor salvar várias notas de uma vez.
+        Recebe uma lista de objetos de nota.
+        """
+        notas_data = request.data
+        if not isinstance(notas_data, list):
+            return Response({"erro": "O payload deve ser uma lista."}, status=status.HTTP_400_BAD_REQUEST)
+
+        resultados = []
+        erros = []
+
+        for nota_data in notas_data:
+            nota_id = nota_data.get('id')
+            valor = nota_data.get('valor')
+
+            # --- Validação de segurança ---
+            disciplina_id = nota_data.get('disciplina')
+            if not Disciplina.objects.filter(id=disciplina_id, professor=request.user).exists():
+                erros.append(f"ID {nota_id or 'novo'}: Você não tem permissão para esta disciplina.")
+                continue
+            # --- Fim da validação ---
+
+            if valor is None or valor == '': # Ignora notas vazias
+                continue
+
+            try:
+                if nota_id:
+                    # Atualiza (UPDATE)
+                    nota = Nota.objects.get(id=nota_id, disciplina__professor=request.user)
+                    serializer = NotaCreateUpdateSerializer(nota, data=nota_data, partial=True)
+                else:
+                    # Cria (CREATE)
+                    serializer = NotaCreateUpdateSerializer(data=nota_data)
+                
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    resultados.append(serializer.data)
+                
+            except Nota.DoesNotExist:
+                erros.append(f"Nota ID {nota_id} não encontrada ou não pertence a você.")
+            except Exception as e:
+                erros.append(f"ID {nota_id or 'novo'}: {str(e)}")
+
+        if erros:
+            return Response({"sucesso": resultados, "erros": erros}, status=status.HTTP_407_PROXY_AUTHENTICATION_REQUIRED)
+            
+        return Response(resultados, status=status.HTTP_200_OK)
 
 
 # ===================================================================
 # VIEWS DE FUNÇÃO (API)
 # ===================================================================
 
-@api_view(['POST']) 
-@permission_classes([IsAuthenticated, IsCoordenacao]) 
-def adicionar_turma(request):
-    """
-    Cria uma nova turma.
-    """
-    serializer = TurmaSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def listar_turmas(request):
-    """
-    Lista todas as turmas (Endpoint simples, o ViewSet é mais completo).
-    """
-    turmas = Turma.objects.all()
-    serializer = TurmaSerializer(turmas, many=True) 
-    return Response(serializer.data)
+# (Views de template 'adicionar_turma' e 'listar_turmas' removidas,
+#  pois agora são cobertas pelo TurmaViewSet)
 
 
-# --- VIEWS DE RELATÓRIO E AGENDA ---
+# --- VIEWS DE RELATÓRIO E AGENDA (Sem grandes mudanças) ---
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def relatorio_desempenho_aluno(request, aluno_id):
-    """
-    Gera relatório com notas, faltas e evolução do aluno.
-    Retorna JSON.
-    """
     aluno = get_object_or_404(Aluno, id=aluno_id)
-
-    # --- CORREÇÃO APLICADA (Substituído 'tipo_usuario' por 'cargo') ---
-    # Lista de cargos administrativos (baseado em base/permissions.py)
     admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
     user_cargo = request.user.cargo
 
     if user_cargo == 'aluno':
-        # Se for aluno, verifica se é o próprio perfil
         if not (hasattr(request.user, 'aluno_profile') and request.user.aluno_profile.id == aluno.id):
             return Response({'erro': 'Acesso negado. Alunos só podem ver o próprio relatório.'}, status=status.HTTP_403_FORBIDDEN)
     
-    # Permite admin E professores (baseado nas permissões do app disciplinar)
     elif user_cargo not in admin_roles and user_cargo != 'professor':
-         # Se não for aluno, nem admin, nem professor, nega o acesso.
          return Response({'erro': 'Você não tem permissão para ver este relatório.'}, status=status.HTTP_403_FORBIDDEN)
-    # --- FIM DA CORREÇÃO ---
-
 
     notas = Nota.objects.filter(aluno=aluno)
     faltas = Falta.objects.filter(aluno=aluno)
@@ -219,14 +280,13 @@ def relatorio_desempenho_aluno(request, aluno_id):
         }
     }
 
-    return Response(context) # --- Usando Response do DRF
+    return Response(context) 
+
+# ... (o restante do arquivo 'views.py' permanece o mesmo) ...
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsCoordenacao]) 
 def relatorio_geral_faltas(request):
-    """
-    Gerar relatórios de faltas. Retorna JSON.
-    """
     relatorio_faltas = Falta.objects.values('aluno__usuario__username', 'disciplina__nome') \
                                    .annotate(total_faltas=Count('id')) \
                                    .order_by('aluno__usuario__username')
@@ -236,10 +296,6 @@ def relatorio_geral_faltas(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsCoordenacao]) 
 def relatorio_gerencial(request):
-    """
-    Análise de eficiência: Taxa de aprovação e Taxa de evasão.
-    Retorna JSON.
-    """
     turmas = Turma.objects.all()
     dados_turmas = []
 
@@ -275,10 +331,6 @@ def relatorio_gerencial(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def calendario_academico(request):
-    """
-    Calendário Acadêmico.
-    Retorna JSON para o frontend (FullCalendar.js).
-    """
     eventos = EventoAcademico.objects.all()
 
     eventos_formatados = []
@@ -296,11 +348,6 @@ def calendario_academico(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsProfessor]) 
 def planos_de_aula_professor(request):
-    """
-    Agenda de Professores e planejamento semanal de aula.
-    (Assume que o usuário logado é um professor).
-    Retorna JSON.
-    """
     try:
         disciplinas_professor = Disciplina.objects.filter(professor=request.user)
         planos = PlanoDeAula.objects.filter(disciplina__in=disciplinas_professor).order_by('data')
@@ -319,13 +366,9 @@ def planos_de_aula_professor(request):
     }
     return Response(context)
 
-# --- VIEW DO PDF (Sem mudanças) ---
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def download_boletim_pdf(request, aluno_id):
-    """
-    Gera um PDF completo do Histórico Acadêmico do aluno.
-    """
     if not weasyprint:
         return HttpResponse("Erro: Biblioteca WeasyPrint não encontrada. Instale-a com 'pip install weasyprint'", status=500)
         
@@ -334,9 +377,9 @@ def download_boletim_pdf(request, aluno_id):
     # (Adicionar lógica de permissão aqui)
 
     notas_disciplinas = Nota.objects.filter(aluno=aluno) \
-                                   .values('disciplina__nome') \
+                                   .values('disciplina__nome', 'bimestre') \
                                    .annotate(media=Avg('valor')) \
-                                   .order_by('disciplina__nome')
+                                   .order_by('disciplina__nome', 'bimestre')
                                    
     total_faltas = Falta.objects.filter(aluno=aluno).count()
     
@@ -345,7 +388,7 @@ def download_boletim_pdf(request, aluno_id):
 
     context = {
         'aluno': aluno,
-        'notas_disciplinas': notas_disciplinas,
+        'notas_disciplinas': notas_disciplinas, # Atualizado para incluir bimestre
         'total_faltas': total_faltas,
         'advertencias': advertencias,
         'suspensoes': suspensoes,
@@ -366,25 +409,13 @@ def download_boletim_pdf(request, aluno_id):
     except Exception as e:
         return HttpResponse(f"Erro ao gerar o PDF: {e}", status=500)
 
-# --- VIEWS DE INSCRIÇÃO EM EVENTOS (Sem mudanças) ---
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def listar_eventos_extracurriculares(request):
-    """
-    Lista todos os eventos com vagas disponíveis.
-    Retorna JSON.
-    """
-    # Esta view não existe mais no seu projeto (foi deletada pela migração 0003)
-    # Mas se existisse, estaria correta.
     return Response({"message": "Esta funcionalidade foi removida."}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def inscrever_evento(request, evento_id):
-    """
-    Processa a inscrição (ou desinscrição) de um aluno em um evento.
-    Retorna JSON.
-    """
     return Response({"message": "Esta funcionalidade foi removida."}, status=status.HTTP_404_NOT_FOUND)

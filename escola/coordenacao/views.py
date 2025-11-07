@@ -1,5 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from .models import EventoCalendario, MaterialDidatico, Colaborador, SalaLaboratorio
+# --- CORREÇÃO AQUI ---
+from escola.pedagogico.models import EventoAcademico # O nome correto é EventoAcademico
+from .models import MaterialDidatico, Colaborador, SalaLaboratorio 
+# --- FIM DA CORREÇÃO ---
 
 def lista_salas(request):
     salas = SalaLaboratorio.objects.all()
@@ -10,7 +13,7 @@ def detalhe_sala(request, sala_id):
     return render(request, 'coordenacao/detalhe_sala.html', {'sala': sala})
 
 def lista_eventos(request):
-    eventos = EventoCalendario.objects.all()
+    eventos = EventoAcademico.objects.all() # O nome da variável aqui não importa
     return render(request, 'coordenacao/lista_eventos.html', {'eventos': eventos})
 
 def lista_materiais(request):

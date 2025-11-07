@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
-from escola.coordenacao.models import MaterialDidatico
+# Corrigido: Importa MaterialDidatico de coordenacao
+from escola.coordenacao.models import MaterialDidatico 
 
 class Turma(models.Model):
     TURNO_CHOICES = (
@@ -21,11 +22,14 @@ class Disciplina(models.Model):
     )
     nome = models.CharField(max_length=100)
     turma = models.ForeignKey(Turma, on_delete=models.CASCADE, related_name='disciplinas')
+    
+    # --- CAMPO NOVO (Para calcular % de faltas) ---
+    carga_horaria = models.PositiveIntegerField(default=80, help_text="Total de aulas no período/ano.")
+
     def __str__(self):
         return f"{self.nome} - {self.turma.nome}"
 
 class Aluno(models.Model):
-    # --- ADICIONE ESTA TUPLA AQUI ---
     STATUS_CHOICES = (
         ('ativo', 'Ativo'),
         ('inativo', 'Inativo'),
@@ -33,7 +37,6 @@ class Aluno(models.Model):
         ('transferido', 'Transferido'),
         ('concluido', 'Concluído'),
     )
-    # ---------------------------------
 
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -41,8 +44,6 @@ class Aluno(models.Model):
         related_name='aluno_profile'
     )
     turma = models.ForeignKey(Turma, on_delete=models.CASCADE, related_name='alunos')
-    
-    # Esta é a linha que você adicionou (e que deu o erro):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ativo') 
 
     def __str__(self):
@@ -51,9 +52,18 @@ class Aluno(models.Model):
 class Nota(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='notas')
     disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='notas')
+    
+    # --- NOVO (Para diferenciar as notas) ---
+    bimestre = models.CharField(max_length=20, default='1º Bimestre') 
+    
     valor = models.DecimalField(max_digits=5, decimal_places=2)
+    
+    class Meta:
+        # Garante que um aluno só tenha uma nota por disciplina por bimestre
+        unique_together = ('aluno', 'disciplina', 'bimestre')
+
     def __str__(self):
-        return f"{self.aluno} - {self.disciplina.nome}: {self.valor}"
+        return f"{self.aluno} - {self.disciplina.nome} ({self.bimestre}): {self.valor}"
 
 class Falta(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)
@@ -79,13 +89,7 @@ class EmprestimoMaterial(models.Model):
     def __str__(self):
         return f"{self.material.nome} - {self.data_emprestimo}"
  
-
-    
 class Responsavel(models.Model):
-    """ 
-    Model para vincular um usuário (Responsável) a um ou mais alunos.
-    Essencial para as notificações de faltas.
-    """
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -97,9 +101,6 @@ class Responsavel(models.Model):
         return self.usuario.get_full_name() or self.usuario.username
 
 class EventoAcademico(models.Model):
-    """ 
-    Para o 'Calendário Acadêmico' (provas, trabalhos, feriados, etc.)
-    """
     TIPO_CHOICES = (
         ('prova', 'Prova'),
         ('trabalho', 'Entrega de Trabalho'),
@@ -113,34 +114,26 @@ class EventoAcademico(models.Model):
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     descricao = models.TextField(blank=True)
     
-    # Vinculado a uma turma (ex: Prova da Turma 3D.S)
     turma = models.ForeignKey(Turma, on_delete=models.CASCADE, related_name='eventos_academicos', null=True, blank=True)
-    # Ou a uma disciplina específica (ex: Prova de Português)
     disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='eventos_academicos', null=True, blank=True)
 
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.titulo} ({self.data_inicio.strftime('%d/%m/%Y')})"
 
 class PlanoDeAula(models.Model):
-    """ 
-    Para a 'Agenda de Professores' e 'planejamento semanal de aula'
-    """
     disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='planos_de_aula')
     data = models.DateField()
     conteudo_previsto = models.TextField(verbose_name="Conteúdo Previsto")
     atividades = models.TextField(blank=True, verbose_name="Atividades/Observações")
     
     class Meta:
-        unique_together = ('disciplina', 'data') # Apenas um plano por disciplina por dia
+        unique_together = ('disciplina', 'data') 
         ordering = ['data']
 
     def __str__(self):
         return f"Plano de {self.disciplina.nome} - {self.data}"
 
 class Notificacao(models.Model):
-    """ 
-    Para 'Enviar notificações' e 'Notificar pais'
-    """
     destinatario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
