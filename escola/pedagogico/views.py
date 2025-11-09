@@ -1,10 +1,17 @@
+<<<<<<< HEAD
+=======
+# Em: escola/pedagogico/views.py
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 import json
 import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Avg, F
 from django.template.loader import render_to_string 
 from django.http import HttpResponse 
+<<<<<<< HEAD
 from django.db import transaction # <-- 1. IMPORTE O 'transaction'
+=======
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action 
@@ -15,9 +22,13 @@ from .serializers import (
     NotaSerializer, EventoAcademicoSerializer, 
     AlunoSerializer, TurmaSerializer, AlunoCreateSerializer,
     PlanoDeAulaSerializer, DisciplinaSerializer,
+<<<<<<< HEAD
     NotaCreateUpdateSerializer,
     MateriaSerializer,
     FaltaSerializer # <-- 2. IMPORTE O 'FaltaSerializer'
+=======
+    NotaCreateUpdateSerializer # --- NOVO ---
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 )
 from escola.base.permissions import IsProfessor, IsAluno, IsCoordenacao 
 
@@ -30,7 +41,10 @@ from .models import (
     Disciplina,
     EventoAcademico, 
     PlanoDeAula,
+<<<<<<< HEAD
     Materia # <-- 'Falta' e 'Presenca' já estavam aqui
+=======
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 )
 from escola.disciplinar.models import Advertencia, Suspensao
 
@@ -43,6 +57,7 @@ except ImportError:
 # VIEWSETS
 # ===================================================================
 
+<<<<<<< HEAD
 class MateriaViewSet(viewsets.ModelViewSet):
     """
     API para Matérias (ex: Matemática, Português).
@@ -58,6 +73,9 @@ class MateriaViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
+=======
+# --- NOVO VIEWSET ---
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 class DisciplinaViewSet(viewsets.ModelViewSet):
     """
     API para Disciplinas.
@@ -68,16 +86,20 @@ class DisciplinaViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
+<<<<<<< HEAD
         queryset = Disciplina.objects.all().order_by('materia__nome') 
 
         turma_id = self.request.query_params.get('turma_id')
         if turma_id:
             queryset = queryset.filter(turma_id=turma_id)
 
+=======
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         if not hasattr(user, 'cargo'):
             return Disciplina.objects.none()
 
         if user.cargo == 'professor':
+<<<<<<< HEAD
             queryset = queryset.filter(professores=user) 
         
         admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
@@ -89,6 +111,15 @@ class DisciplinaViewSet(viewsets.ModelViewSet):
                 return queryset.filter(turma=user.aluno_profile.turma)
 
         return queryset
+=======
+            return Disciplina.objects.filter(professor=user)
+        
+        admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
+        if user.cargo in admin_roles or user.is_superuser:
+            return Disciplina.objects.all()
+            
+        return Disciplina.objects.none()
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -125,6 +156,7 @@ class AlunoViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
+<<<<<<< HEAD
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -138,6 +170,8 @@ class AlunoViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(response_data)
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
+=======
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 class TurmaViewSet(viewsets.ModelViewSet):
     queryset = Turma.objects.all().order_by('nome')
     serializer_class = TurmaSerializer
@@ -152,6 +186,10 @@ class TurmaViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def detalhe_com_alunos(self, request, pk=None):
         turma = self.get_object()
+<<<<<<< HEAD
+=======
+        # --- ATUALIZADO: Busca alunos pela turma e filtra por status ativo ---
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         alunos_da_turma = Aluno.objects.filter(
             turma=turma, 
             status='ativo'
@@ -165,6 +203,7 @@ class TurmaViewSet(viewsets.ModelViewSet):
             'alunos': alunos_data
         })
 
+<<<<<<< HEAD
 class NotaViewSet(viewsets.ModelViewSet):
     
     def get_serializer_class(self):
@@ -175,6 +214,23 @@ class NotaViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'bulk_update_notas']:
             permission_classes = [permissions.IsAuthenticated, (IsProfessor | IsCoordenacao)]
+=======
+# --- VIEWSET DE NOTAS ATUALIZADO E CORRIGIDO ---
+class NotaViewSet(viewsets.ModelViewSet):
+    
+    def get_serializer_class(self):
+        # Usa um serializer simples para criar/atualizar
+        if self.action in ['create', 'update', 'partial_update']:
+            return NotaCreateUpdateSerializer
+        # E um serializer completo para listar/ver
+        return NotaSerializer
+    
+    def get_permissions(self):
+        # Apenas professores podem criar/editar/deletar notas
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'bulk_update_notas']:
+            permission_classes = [permissions.IsAuthenticated, IsProfessor]
+        # Alunos, Professores e Admins podem ver
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         elif self.action in ['list', 'retrieve']:
             permission_classes = [permissions.IsAuthenticated]
         else:
@@ -188,6 +244,10 @@ class NotaViewSet(viewsets.ModelViewSet):
         if not hasattr(user, 'cargo'):
             return Nota.objects.none()
 
+<<<<<<< HEAD
+=======
+        # Filtros da Query String (usados pelo frontend de "Lançar Notas")
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         disciplina_id = self.request.query_params.get('disciplina_id')
         aluno_id = self.request.query_params.get('aluno_id')
 
@@ -196,6 +256,10 @@ class NotaViewSet(viewsets.ModelViewSet):
         if aluno_id:
              queryset = queryset.filter(aluno_id=aluno_id)
 
+<<<<<<< HEAD
+=======
+        # Filtros de Permissão
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         if user.cargo == 'aluno':
             if hasattr(user, 'aluno_profile'):
                 return queryset.filter(aluno=user.aluno_profile)
@@ -203,6 +267,7 @@ class NotaViewSet(viewsets.ModelViewSet):
                 return Nota.objects.none() 
         
         if user.cargo == 'professor':
+<<<<<<< HEAD
             return queryset.filter(disciplina__professores=user) 
         
         admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
@@ -215,6 +280,22 @@ class NotaViewSet(viewsets.ModelViewSet):
     def bulk_update_notas(self, request):
         """
         Ação customizada para salvar várias notas de uma vez.
+=======
+            # Professor só vê notas das disciplinas que ele leciona
+            return queryset.filter(disciplina__professor=user)
+        
+        admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
+        if user.cargo in admin_roles or user.is_superuser:
+            return queryset # Admins veem tudo (respeitando os filtros da query)
+            
+        return Nota.objects.none()
+
+    @action(detail=False, methods=['post'], permission_classes=[IsProfessor])
+    def bulk_update_notas(self, request):
+        """
+        Ação customizada para o professor salvar várias notas de uma vez.
+        Recebe uma lista de objetos de nota.
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         """
         notas_data = request.data
         if not isinstance(notas_data, list):
@@ -222,11 +303,15 @@ class NotaViewSet(viewsets.ModelViewSet):
 
         resultados = []
         erros = []
+<<<<<<< HEAD
         user = request.user
+=======
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
         for nota_data in notas_data:
             nota_id = nota_data.get('id')
             valor = nota_data.get('valor')
+<<<<<<< HEAD
             disciplina_id = nota_data.get('disciplina')
 
             is_admin = user.cargo in ['administrador', 'coordenador', 'diretor', 'ti']
@@ -237,10 +322,22 @@ class NotaViewSet(viewsets.ModelViewSet):
                 continue
 
             if valor is None or valor == '': 
+=======
+
+            # --- Validação de segurança ---
+            disciplina_id = nota_data.get('disciplina')
+            if not Disciplina.objects.filter(id=disciplina_id, professor=request.user).exists():
+                erros.append(f"ID {nota_id or 'novo'}: Você não tem permissão para esta disciplina.")
+                continue
+            # --- Fim da validação ---
+
+            if valor is None or valor == '': # Ignora notas vazias
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
                 continue
 
             try:
                 if nota_id:
+<<<<<<< HEAD
                     if is_admin:
                         nota = Nota.objects.get(id=nota_id)
                     else:
@@ -248,6 +345,13 @@ class NotaViewSet(viewsets.ModelViewSet):
                         
                     serializer = NotaCreateUpdateSerializer(nota, data=nota_data, partial=True)
                 else:
+=======
+                    # Atualiza (UPDATE)
+                    nota = Nota.objects.get(id=nota_id, disciplina__professor=request.user)
+                    serializer = NotaCreateUpdateSerializer(nota, data=nota_data, partial=True)
+                else:
+                    # Cria (CREATE)
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
                     serializer = NotaCreateUpdateSerializer(data=nota_data)
                 
                 if serializer.is_valid(raise_exception=True):
@@ -257,6 +361,7 @@ class NotaViewSet(viewsets.ModelViewSet):
             except Nota.DoesNotExist:
                 erros.append(f"Nota ID {nota_id} não encontrada ou não pertence a você.")
             except Exception as e:
+<<<<<<< HEAD
                 if 'UNIQUE constraint' in str(e):
                     erros.append(f"Erro na Disc. {disciplina_id}: Esta nota já foi lançada para este bimestre.")
                 else:
@@ -382,11 +487,21 @@ class FaltaViewSet(viewsets.ModelViewSet):
             {"sucesso": f"{len(novas_faltas)} faltas e {len(novas_presencas)} presenças registradas."}, 
             status=status.HTTP_201_CREATED
         )
+=======
+                erros.append(f"ID {nota_id or 'novo'}: {str(e)}")
+
+        if erros:
+            return Response({"sucesso": resultados, "erros": erros}, status=status.HTTP_407_PROXY_AUTHENTICATION_REQUIRED)
+            
+        return Response(resultados, status=status.HTTP_200_OK)
+
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
 # ===================================================================
 # VIEWS DE FUNÇÃO (API)
 # ===================================================================
 
+<<<<<<< HEAD
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def relatorio_desempenho_aluno(request, aluno_id):
@@ -398,11 +513,26 @@ def relatorio_desempenho_aluno(request, aluno_id):
 
     admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
     user_cargo = getattr(request.user, 'cargo', None) 
+=======
+# (Views de template 'adicionar_turma' e 'listar_turmas' removidas,
+#  pois agora são cobertas pelo TurmaViewSet)
+
+
+# --- VIEWS DE RELATÓRIO E AGENDA (Sem grandes mudanças) ---
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def relatorio_desempenho_aluno(request, aluno_id):
+    aluno = get_object_or_404(Aluno, id=aluno_id)
+    admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
+    user_cargo = request.user.cargo
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
     if user_cargo == 'aluno':
         if not (hasattr(request.user, 'aluno_profile') and request.user.aluno_profile.id == aluno.id):
             return Response({'erro': 'Acesso negado. Alunos só podem ver o próprio relatório.'}, status=status.HTTP_403_FORBIDDEN)
     
+<<<<<<< HEAD
     elif user_cargo == 'professor':
         disciplinas_professor = Disciplina.objects.filter(professores=request.user)
         turmas_professor = Turma.objects.filter(disciplinas__in=disciplinas_professor).distinct()
@@ -410,26 +540,43 @@ def relatorio_desempenho_aluno(request, aluno_id):
              return Response({'erro': 'Você não tem permissão para ver relatórios desta turma.'}, status=status.HTTP_403_FORBIDDEN)
     
     elif user_cargo not in admin_roles:
+=======
+    elif user_cargo not in admin_roles and user_cargo != 'professor':
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
          return Response({'erro': 'Você não tem permissão para ver este relatório.'}, status=status.HTTP_403_FORBIDDEN)
 
     notas = Nota.objects.filter(aluno=aluno)
     faltas = Falta.objects.filter(aluno=aluno)
     presencas = Presenca.objects.filter(aluno=aluno)
 
+<<<<<<< HEAD
     medias_disciplinas = notas.values('disciplina__materia__nome').annotate(
         media=Avg('valor')
     ).order_by('disciplina__materia__nome')
+=======
+    medias_disciplinas = notas.values('disciplina__nome').annotate(
+        media=Avg('valor')
+    )
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
     context = {
         'aluno': {
             'nome': aluno.usuario.get_full_name() or aluno.usuario.username,
             'turma': {
+<<<<<<< HEAD
                 'id': aluno.turma.id if aluno.turma else None,
                 'nome': aluno.turma.nome if aluno.turma else 'Sem turma'
             },
             'status': aluno.get_status_display()
         },
         'medias_disciplinas': [{'disciplina__nome': item['disciplina__materia__nome'], 'media': item['media']} for item in medias_disciplinas], 
+=======
+                'nome': aluno.turma.nome if aluno.turma else None
+            },
+            'status': aluno.get_status_display()
+        },
+        'medias_disciplinas': list(medias_disciplinas), 
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         'faltas': {
             'count': faltas.count()
         },
@@ -438,12 +585,22 @@ def relatorio_desempenho_aluno(request, aluno_id):
         }
     }
 
+<<<<<<< HEAD
     return Response(context)
+=======
+    return Response(context) 
+
+# ... (o restante do arquivo 'views.py' permanece o mesmo) ...
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsCoordenacao]) 
 def relatorio_geral_faltas(request):
+<<<<<<< HEAD
     relatorio_faltas = Falta.objects.values('aluno__usuario__username', 'disciplina__materia__nome') \
+=======
+    relatorio_faltas = Falta.objects.values('aluno__usuario__username', 'disciplina__nome') \
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
                                    .annotate(total_faltas=Count('id')) \
                                    .order_by('aluno__usuario__username')
     
@@ -488,7 +645,10 @@ def relatorio_gerencial(request):
 @permission_classes([IsAuthenticated])
 def calendario_academico(request):
     eventos = EventoAcademico.objects.all()
+<<<<<<< HEAD
     # (Adicionar filtro por turma/disciplina do usuário logado)
+=======
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
     eventos_formatados = []
     for evento in eventos:
@@ -506,7 +666,11 @@ def calendario_academico(request):
 @permission_classes([IsAuthenticated, IsProfessor]) 
 def planos_de_aula_professor(request):
     try:
+<<<<<<< HEAD
         disciplinas_professor = Disciplina.objects.filter(professores=request.user)
+=======
+        disciplinas_professor = Disciplina.objects.filter(professor=request.user)
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         planos = PlanoDeAula.objects.filter(disciplina__in=disciplinas_professor).order_by('data')
     except (Disciplina.DoesNotExist, TypeError, AttributeError):
         return Response(
@@ -534,9 +698,15 @@ def download_boletim_pdf(request, aluno_id):
     # (Adicionar lógica de permissão aqui)
 
     notas_disciplinas = Nota.objects.filter(aluno=aluno) \
+<<<<<<< HEAD
                                    .values('disciplina__materia__nome', 'bimestre') \
                                    .annotate(media=Avg('valor')) \
                                    .order_by('disciplina__materia__nome', 'bimestre')
+=======
+                                   .values('disciplina__nome', 'bimestre') \
+                                   .annotate(media=Avg('valor')) \
+                                   .order_by('disciplina__nome', 'bimestre')
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
                                    
     total_faltas = Falta.objects.filter(aluno=aluno).count()
     
@@ -545,7 +715,11 @@ def download_boletim_pdf(request, aluno_id):
 
     context = {
         'aluno': aluno,
+<<<<<<< HEAD
         'notas_disciplinas': notas_disciplinas, 
+=======
+        'notas_disciplinas': notas_disciplinas, # Atualizado para incluir bimestre
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
         'total_faltas': total_faltas,
         'advertencias': advertencias,
         'suspensoes': suspensoes,

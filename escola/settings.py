@@ -16,8 +16,11 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+<<<<<<< HEAD
 AUTH_PASSWORD_VALIDATORS = []
 
+=======
+>>>>>>> cc2921efa3437c520e2c524795c3e57a8bdac22c
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
