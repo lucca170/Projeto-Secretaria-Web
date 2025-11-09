@@ -1,0 +1,64 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Boletim de {{ aluno.nome }}</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Disciplina</th>
+                <th>Notas</th>
+                <th>Comentários</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for disciplina, dados in boletim.items %}
+            <tr>
+                <td>{{ disciplina }}</td>
+                <td>
+                    {% for nota in dados.notas %}
+                        {{ nota }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for comentario in dados.comentarios %}
+                        <p>{{ comentario }}</p>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="width: 80%; margin: auto;">
+        <canvas id="performanceChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartData = JSON.parse('{{ chart_data_json|safe }}');
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Média de Notas por Disciplina',
+                data: chartData.data,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
