@@ -27,18 +27,19 @@ function Layout({ toggleTheme, onLogout }) {
   };
   
   const getNavLinks = () => {
-    const role = userData ? userData.role : null;
+    const role = userData ? userData.cargo : null; 
     
     // --- Links Padrão (Admin/Coord) ---
     const adminLinks = [
       { label: 'Dashboard', path: '/dashboard' },
       { label: 'Alunos', path: '/alunos' },
+      { label: 'Professores', path: '/professores' }, // <-- ADICIONADO AQUI
       { label: 'Turmas', path: '/turmas' },
       { label: 'Calendário', path: '/calendario' },
       { label: 'Biblioteca', path: '/biblioteca' },
-      // --- LINKS NOVOS ---
       { label: 'Salas', path: '/salas' },
       { label: 'Materiais', path: '/materiais' },
+      { label: 'Matérias', path: '/materias' }, 
       { label: 'Relatórios', path: '/relatorios' },
     ];
     
@@ -47,14 +48,13 @@ function Layout({ toggleTheme, onLogout }) {
       { label: 'Dashboard', path: '/dashboard' },
       { label: 'Minhas Turmas', path: '/turmas' }, 
       { label: 'Calendário', path: '/calendario' },
-      // --- LINK NOVO ---
       { label: 'Minha Agenda', path: '/agenda' },
     ];
     
-    // --- Links de Aluno (Sem alteração) ---
+    // --- Links de Aluno ---
     const alunoLinks = [
       { label: 'Dashboard', path: '/dashboard' },
-      { label: 'Meu Boletim', path: `/relatorio/aluno/${userData ? userData.id : ''}` }, 
+      { label: 'Meu Boletim', path: `/relatorio/aluno/${userData ? userData.aluno_id : ''}` }, 
       { label: 'Calendário', path: '/calendario' },
       { label: 'Biblioteca', path: '/biblioteca' },
     ];

@@ -1,3 +1,4 @@
+# Em: escola/base/permissions.py
 from rest_framework import permissions
 
 class IsProfessor(permissions.BasePermission):

@@ -19,13 +19,13 @@ import {
   Grid
 } from '@mui/material';
 
-// Funções auxiliares (copiadas do CalendarioAcademico)
+// --- FUNÇÃO DE ROLE CORRIGIDA ---
 const getUserRole = () => {
   try {
     const userData = localStorage.getItem('userData');
     if (!userData) return null;
     const user = JSON.parse(userData);
-    return user.role;
+    return user.cargo; // <-- CORRIGIDO DE 'user.role' PARA 'user.cargo'
   } catch (e) { return null; }
 };
 const adminRoles = ['administrador', 'coordenador', 'diretor', 'ti'];

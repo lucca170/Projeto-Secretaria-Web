@@ -25,15 +25,22 @@ import MeusEmprestimos from './pages/MeusEmprestimos';
 import AdicionarLivro from './pages/AdicionarLivro'; 
 import EditarLivro from './pages/EditarLivro';     
 
-// --- NOVOS IMPORTS ---
+// --- IMPORTS ATUALIZADOS ---
 import RelatoriosGerenciais from './pages/RelatoriosGerenciais';
 import AgendaProfessor from './pages/AgendaProfessor';
 import GerenciarMateriais from './pages/GerenciarMateriais';
 import GerenciarSalas from './pages/GerenciarSalas';
-// --- FIM NOVOS IMPORTS ---
+import AdicionarSala from './pages/AdicionarSala'; 
+import AdicionarMaterial from './pages/AdicionarMaterial'; 
+import GerenciarMaterias from './pages/GerenciarMaterias';
+import AdicionarMateria from './pages/AdicionarMateria';   
+import GerenciarProfessores from './pages/GerenciarProfessores'; // <-- NOVO
+import AdicionarProfessor from './pages/AdicionarProfessor';   // <-- NOVO
+// --- FIM IMPORTS ---
 
 
 function App() {
+  // ... (código do 'theme' e 'login' continua igual) ...
   const [mode, setMode] = useState('light');
 
   const toggleTheme = () => {
@@ -103,6 +110,10 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             
+            {/* Rotas de Professores (NOVO) */}
+            <Route path="professores" element={<GerenciarProfessores />} />
+            <Route path="professores/adicionar" element={<AdicionarProfessor />} />
+            
             {/* Rotas de Alunos e Turmas */}
             <Route path="alunos" element={<Alunos />} />
             <Route path="alunos/adicionar" element={<AdicionarAluno />} />
@@ -124,11 +135,15 @@ function App() {
             {/* Rota de Relatório Individual */}
             <Route path="relatorio/aluno/:alunoId" element={<RelatorioAluno />} />
             
-            {/* --- NOVAS ROTAS --- */}
+            {/* --- ROTAS ATUALIZADAS --- */}
             <Route path="relatorios" element={<RelatoriosGerenciais />} />
             <Route path="agenda" element={<AgendaProfessor />} />
             <Route path="materiais" element={<GerenciarMateriais />} />
             <Route path="salas" element={<GerenciarSalas />} />
+            <Route path="salas/adicionar" element={<AdicionarSala />} />
+            <Route path="materiais/adicionar" element={<AdicionarMaterial />} />
+            <Route path="materias" element={<GerenciarMaterias />} /> 
+            <Route path="materias/adicionar" element={<AdicionarMateria />} /> 
             {/* --- FIM NOVAS ROTAS --- */}
 
           </Route>

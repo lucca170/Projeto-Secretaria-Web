@@ -98,7 +98,6 @@ INSTALLED_APPS = [
     'escola.base',
     'escola.coordenacao',
     'escola.disciplinar',
-    'escola.financeiro',
     'escola.pedagogico',
     'escola.biblioteca',
 ]

@@ -8,12 +8,13 @@ import './Calendario.css';
 import { Box, Button } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
+// --- FUNÇÃO DE ROLE CORRIGIDA ---
 const getUserRole = () => {
   try {
     const userData = localStorage.getItem('userData');
     if (!userData) return null;
     const user = JSON.parse(userData);
-    return user.role;
+    return user.cargo; // <-- CORRIGIDO DE 'user.role' PARA 'user.cargo'
   } catch (e) {
     console.error("Erro ao ler dados do usuário:", e);
     return null;

@@ -16,13 +16,13 @@ import {
 import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// --- 1. ADICIONE AS FUNÇÕES DE ROLE ---
+// --- FUNÇÃO DE ROLE CORRIGIDA ---
 const getUserRole = () => {
   try {
     const userData = localStorage.getItem('userData');
     if (!userData) return null;
     const user = JSON.parse(userData);
-    return user.role;
+    return user.cargo; // <-- CORRIGIDO DE 'user.role' PARA 'user.cargo'
   } catch (e) { return null; }
 };
 const canManageRoles = ['administrador', 'coordenador', 'diretor', 'ti', 'professor'];
@@ -34,7 +34,7 @@ function DetalheTurma() {
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userRole, setUserRole] = useState(null); // <-- 2. ADICIONE O ESTADO
+  const [userRole, setUserRole] = useState(null); // <-- 3. DEFINA O ESTADO
   const token = localStorage.getItem('authToken');
   const navigate = useNavigate();
 

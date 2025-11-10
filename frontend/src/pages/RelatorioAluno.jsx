@@ -18,13 +18,13 @@ import {
 // Se você não criou o arquivo EditarNotasModal.jsx, comente esta linha
 import EditarNotasModal from '../components/EditarNotasModal'; 
 
-// --- (Funções de role existentes) ---
+// --- (Funções de role corrigidas) ---
 const getUserRole = () => {
   try {
     const userData = localStorage.getItem('userData');
     if (!userData) return null;
     const user = JSON.parse(userData);
-    return user.role;
+    return user.cargo; // <-- CORRIGIDO DE 'user.role' PARA 'user.cargo'
   } catch (e) { return null; }
 };
 const canEditRoles = ['administrador', 'coordenador', 'diretor', 'ti', 'professor'];

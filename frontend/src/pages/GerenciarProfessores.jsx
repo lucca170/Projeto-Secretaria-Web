@@ -1,5 +1,6 @@
-// Em: frontend/src/pages/GerenciarSalas.jsx
-import React, { useState, useEffect } from 'react'; // <-- Imports atualizados
+// Em: frontend/src/pages/GerenciarProfessores.jsx (NOVO ARQUIVO)
+
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
     Container, 
@@ -14,46 +15,46 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Button // <-- Importado
+    Button
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom'; // <-- Importado
+import { Link as RouterLink } from 'react-router-dom';
 
 const token = localStorage.getItem('authToken');
 
-// --- ADICIONADO: Lógica de permissão ---
+// Lógica de permissão
 const getUserRole = () => {
   try {
     const userData = localStorage.getItem('userData');
     if (!userData) return null;
     const user = JSON.parse(userData);
-    return user.cargo; // <-- Verifica o 'cargo'
+    return user.cargo; 
   } catch (e) { return null; }
 };
 const adminRoles = ['administrador', 'coordenador', 'diretor', 'ti'];
-// ------------------------------------
 
-function GerenciarSalas() {
-  const [salas, setSalas] = useState([]);
+function GerenciarProfessores() {
+  const [professores, setProfessores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [userRole, setUserRole] = useState(null); // <-- Adicionado
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    setUserRole(getUserRole()); // <-- Adicionado
+    setUserRole(getUserRole());
 
-    const fetchSalas = async () => {
+    const fetchProfessores = async () => {
       setLoading(true);
       try {
         const headers = { 'Authorization': `Token ${token}` };
-        const res = await axios.get('http://127.0.0.1:8000/coordenacao/api/salas/', { headers });
-        setSalas(res.data);
+        // Usamos a API de /api/users/ com o filtro de cargo
+        const res = await axios.get('http://127.0.0.1:8000/api/users/?cargo=professor', { headers });
+        setProfessores(res.data);
       } catch (err) {
-        setError('Erro ao buscar salas.');
+        setError('Erro ao buscar professores.');
       } finally {
         setLoading(false);
       }
     };
-    fetchSalas();
+    fetchProfessores();
   }, []);
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
@@ -63,39 +64,39 @@ function GerenciarSalas() {
     <Container sx={{ mt: 4, mb: 4 }}>
       <Paper sx={{ p: 3 }}>
         
-        {/* --- ADICIONADO: Cabeçalho com Botão --- */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
-            Gerenciar Salas e Laboratórios
+            Gerenciar Professores
           </Typography>
           {adminRoles.includes(userRole) && (
             <Button
               component={RouterLink}
-              to="/salas/adicionar" // <-- (Precisaremos criar esta página depois)
+              to="/professores/adicionar"
               variant="contained"
               color="primary"
             >
-              Adicionar Sala
+              Adicionar Professor
             </Button>
           )}
         </Box>
-        {/* ------------------------------------- */}
-
+        
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Nome</TableCell>
-                <TableCell>Tipo</TableCell>
-                <TableCell align="right">Capacidade</TableCell>
+                <TableCell>CPF (Login)</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell align="right">ID</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {salas.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.nome}</TableCell>
-                  <TableCell>{item.tipo}</TableCell>
-                  <TableCell align="right">{item.capacidade}</TableCell>
+              {professores.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.first_name} {user.last_name}</TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell>{user.email || 'N/A'}</TableCell>
+                  <TableCell align="right">{user.id}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -106,4 +107,4 @@ function GerenciarSalas() {
   );
 }
 
-export default GerenciarSalas;
+export default GerenciarProfessores;

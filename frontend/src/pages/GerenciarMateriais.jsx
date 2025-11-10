@@ -1,5 +1,5 @@
 // Em: frontend/src/pages/GerenciarMateriais.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // <-- Imports atualizados
 import axios from 'axios';
 import { 
     Container, 
@@ -14,22 +14,38 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Checkbox
+    Checkbox,
+    Button // <-- Importado
 } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom'; // <-- Importado
 
 const token = localStorage.getItem('authToken');
+
+// --- ADICIONADO: Lógica de permissão ---
+const getUserRole = () => {
+  try {
+    const userData = localStorage.getItem('userData');
+    if (!userData) return null;
+    const user = JSON.parse(userData);
+    return user.cargo; // <-- Verifica o 'cargo'
+  } catch (e) { return null; }
+};
+const adminRoles = ['administrador', 'coordenador', 'diretor', 'ti'];
+// ------------------------------------
 
 function GerenciarMateriais() {
   const [materiais, setMateriais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userRole, setUserRole] = useState(null); // <-- Adicionado
 
   useEffect(() => {
+    setUserRole(getUserRole()); // <-- Adicionado
+
     const fetchMateriais = async () => {
       setLoading(true);
       try {
         const headers = { 'Authorization': `Token ${token}` };
-        // Nova API criada no Passo 2
         const res = await axios.get('http://127.0.0.1:8000/coordenacao/api/materiais/', { headers });
         setMateriais(res.data);
       } catch (err) {
@@ -47,7 +63,25 @@ function GerenciarMateriais() {
   return (
     <Container sx={{ mt: 4, mb: 4 }}>
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>Gerenciar Materiais Didáticos</Typography>
+        
+        {/* --- ADICIONADO: Cabeçalho com Botão --- */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
+            Gerenciar Materiais Didáticos
+          </Typography>
+          {adminRoles.includes(userRole) && (
+            <Button
+              component={RouterLink}
+              to="/materiais/adicionar" // <-- (Precisaremos criar esta página depois)
+              variant="contained"
+              color="primary"
+            >
+              Adicionar Material
+            </Button>
+          )}
+        </Box>
+        {/* ------------------------------------- */}
+        
         <TableContainer>
           <Table>
             <TableHead>

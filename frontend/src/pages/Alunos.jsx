@@ -11,16 +11,16 @@ import {
     Box, 
     Paper 
 } from '@mui/material';
-import { Link, Link as RouterLink } from 'react-router-dom'; // <-- ADICIONADO RouterLink
+import { Link, Link as RouterLink } from 'react-router-dom'; 
 import axios from 'axios'; 
 
-// --- ADICIONAR FUNÇÕES DE ROLE ---
+// --- FUNÇÃO DE ROLE CORRIGIDA ---
 const getUserRole = () => {
   try {
     const userData = localStorage.getItem('userData');
     if (!userData) return null;
     const user = JSON.parse(userData);
-    return user.role;
+    return user.cargo; // <-- CORRIGIDO DE 'user.role' PARA 'user.cargo'
   } catch (e) { return null; }
 };
 const adminRoles = ['administrador', 'coordenador', 'diretor', 'ti'];
@@ -30,11 +30,11 @@ function Alunos() {
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userRole, setUserRole] = useState(null); // <-- ADICIONAR
+  const [userRole, setUserRole] = useState(null); 
   const token = localStorage.getItem('authToken');
 
   useEffect(() => {
-    setUserRole(getUserRole()); // <-- ADICIONAR
+    setUserRole(getUserRole()); // Define o cargo
 
     // URL da API de alunos (registrada no urls.py)
     const apiUrl = 'http://127.0.0.1:8000/pedagogico/api/alunos/';
