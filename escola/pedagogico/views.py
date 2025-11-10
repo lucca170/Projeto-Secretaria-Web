@@ -4,7 +4,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Avg, F
 from django.template.loader import render_to_string 
 from django.http import HttpResponse 
-from django.db import transaction # <-- 1. IMPORTE O 'transaction'
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action 
@@ -15,22 +14,21 @@ from .serializers import (
     NotaSerializer, EventoAcademicoSerializer, 
     AlunoSerializer, TurmaSerializer, AlunoCreateSerializer,
     PlanoDeAulaSerializer, DisciplinaSerializer,
-    NotaCreateUpdateSerializer,
-    MateriaSerializer,
-    FaltaSerializer # <-- 2. IMPORTE O 'FaltaSerializer'
+    NotaCreateUpdateSerializer, MateriaSerializer,
+    FaltaSerializer  # <-- ADICIONADO AQUI
 )
 from escola.base.permissions import IsProfessor, IsAluno, IsCoordenacao 
 
 from .models import (
     Aluno, 
     Nota, 
-    Falta, 
+    Falta,  # <-- ADICIONADO AQUI
     Presenca, 
     Turma, 
     Disciplina,
     EventoAcademico, 
     PlanoDeAula,
-    Materia # <-- 'Falta' e 'Presenca' já estavam aqui
+    Materia
 )
 from escola.disciplinar.models import Advertencia, Suspensao
 
@@ -42,21 +40,6 @@ except ImportError:
 # ===================================================================
 # VIEWSETS
 # ===================================================================
-
-class MateriaViewSet(viewsets.ModelViewSet):
-    """
-    API para Matérias (ex: Matemática, Português).
-    """
-    queryset = Materia.objects.all().order_by('nome')
-    serializer_class = MateriaSerializer
-    
-    def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsCoordenacao]
-        else: 
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
-
 
 class DisciplinaViewSet(viewsets.ModelViewSet):
     """
@@ -70,6 +53,7 @@ class DisciplinaViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = Disciplina.objects.all().order_by('materia__nome') 
 
+        # 1. Permite filtrar por turma_id (para o novo modal de notas)
         turma_id = self.request.query_params.get('turma_id')
         if turma_id:
             queryset = queryset.filter(turma_id=turma_id)
@@ -77,18 +61,19 @@ class DisciplinaViewSet(viewsets.ModelViewSet):
         if not hasattr(user, 'cargo'):
             return Disciplina.objects.none()
 
+        # 2. Aplica filtro de permissão
         if user.cargo == 'professor':
-            queryset = queryset.filter(professores=user) 
+            queryset = queryset.filter(professores=user)
         
         admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
         if user.cargo in admin_roles or user.is_superuser:
-            return queryset 
+            return queryset # Admin vê tudo (respeitando o filtro de turma)
             
         if user.cargo == 'aluno': 
             if hasattr(user, 'aluno_profile'):
                 return queryset.filter(turma=user.aluno_profile.turma)
 
-        return queryset
+        return Disciplina.objects.none()
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -124,19 +109,6 @@ class AlunoViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        read_serializer = AlunoSerializer(instance, context={'request': request})
-        response_data = read_serializer.data
-        
-        if hasattr(instance, 'temp_password'):
-            response_data['temp_password'] = instance.temp_password
-            
-        headers = self.get_success_headers(response_data)
-        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
 class TurmaViewSet(viewsets.ModelViewSet):
     queryset = Turma.objects.all().order_by('nome')
@@ -174,7 +146,7 @@ class NotaViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'bulk_update_notas']:
-            permission_classes = [permissions.IsAuthenticated, (IsProfessor | IsCoordenacao)]
+            permission_classes = [permissions.IsAuthenticated, IsProfessor]
         elif self.action in ['list', 'retrieve']:
             permission_classes = [permissions.IsAuthenticated]
         else:
@@ -203,7 +175,7 @@ class NotaViewSet(viewsets.ModelViewSet):
                 return Nota.objects.none() 
         
         if user.cargo == 'professor':
-            return queryset.filter(disciplina__professores=user) 
+            return queryset.filter(disciplina__professores=user)
         
         admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
         if user.cargo in admin_roles or user.is_superuser:
@@ -211,10 +183,10 @@ class NotaViewSet(viewsets.ModelViewSet):
             
         return Nota.objects.none()
 
-    @action(detail=False, methods=['post'], permission_classes=[(IsProfessor | IsCoordenacao)])
+    @action(detail=False, methods=['post'], permission_classes=[IsProfessor])
     def bulk_update_notas(self, request):
         """
-        Ação customizada para salvar várias notas de uma vez.
+        Ação customizada para o professor salvar várias notas de uma vez.
         """
         notas_data = request.data
         if not isinstance(notas_data, list):
@@ -222,32 +194,28 @@ class NotaViewSet(viewsets.ModelViewSet):
 
         resultados = []
         erros = []
-        user = request.user
 
         for nota_data in notas_data:
             nota_id = nota_data.get('id')
             valor = nota_data.get('valor')
             disciplina_id = nota_data.get('disciplina')
 
-            is_admin = user.cargo in ['administrador', 'coordenador', 'diretor', 'ti']
-            is_professor_da_disciplina = Disciplina.objects.filter(id=disciplina_id, professores=user).exists()
-
-            if not (is_admin or is_professor_da_disciplina):
+            # --- VERIFICAÇÃO DE PERMISSÃO ---
+            if not Disciplina.objects.filter(id=disciplina_id, professores=request.user).exists():
                 erros.append(f"ID {nota_id or 'novo'}: Você não tem permissão para esta disciplina.")
                 continue
+            # --- FIM DA VERIFICAÇÃO ---
 
             if valor is None or valor == '': 
                 continue
 
             try:
                 if nota_id:
-                    if is_admin:
-                        nota = Nota.objects.get(id=nota_id)
-                    else:
-                        nota = Nota.objects.get(id=nota_id, disciplina__professores=user)
-                        
+                    # Atualiza (UPDATE)
+                    nota = Nota.objects.get(id=nota_id, disciplina__professores=request.user)
                     serializer = NotaCreateUpdateSerializer(nota, data=nota_data, partial=True)
                 else:
+                    # Cria (CREATE)
                     serializer = NotaCreateUpdateSerializer(data=nota_data)
                 
                 if serializer.is_valid(raise_exception=True):
@@ -267,121 +235,71 @@ class NotaViewSet(viewsets.ModelViewSet):
             
         return Response(resultados, status=status.HTTP_200_OK)
 
-# --- 3. ADICIONE ESTE VIEWSET NOVO ---
+class MateriaViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint para Matérias (ex: Matemática, Português).
+    """
+    queryset = Materia.objects.all().order_by('nome')
+    serializer_class = MateriaSerializer
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            permission_classes = [permissions.IsAuthenticated, IsCoordenacao]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+# --- NOVA VIEWSET ADICIONADA ---
 class FaltaViewSet(viewsets.ModelViewSet):
     """
-    API para Faltas.
-    Professores/Coordenação podem lançar/deletar.
-    Alunos podem apenas ver as suas.
+    API endpoint para Faltas.
     """
     serializer_class = FaltaSerializer
-    
+
+    def get_permissions(self):
+        # Apenas professores podem criar/editar/deletar faltas
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            permission_classes = [permissions.IsAuthenticated, IsProfessor]
+        # Todos logados podem ver
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
     def get_queryset(self):
         user = self.request.user
         queryset = Falta.objects.all()
 
         if not hasattr(user, 'cargo'):
             return Falta.objects.none()
-        
+
+        disciplina_id = self.request.query_params.get('disciplina_id')
+        aluno_id = self.request.query_params.get('aluno_id')
+
+        if disciplina_id:
+            queryset = queryset.filter(disciplina_id=disciplina_id)
+        if aluno_id:
+             queryset = queryset.filter(aluno_id=aluno_id)
+
         # Aluno só vê as próprias faltas
         if user.cargo == 'aluno':
             if hasattr(user, 'aluno_profile'):
                 return queryset.filter(aluno=user.aluno_profile)
-            return Falta.objects.none()
+            else:
+                return Falta.objects.none() 
         
-        # Professor vê as faltas das suas disciplinas
+        # Professor só vê faltas das suas disciplinas
         if user.cargo == 'professor':
             return queryset.filter(disciplina__professores=user)
         
         # Admin/Coord vê tudo
         admin_roles = ['administrador', 'coordenador', 'diretor', 'ti']
         if user.cargo in admin_roles or user.is_superuser:
-            # Permite filtrar por aluno ou disciplina na URL
-            aluno_id = self.request.query_params.get('aluno_id')
-            disciplina_id = self.request.query_params.get('disciplina_id')
-            if aluno_id:
-                queryset = queryset.filter(aluno_id=aluno_id)
-            if disciplina_id:
-                queryset = queryset.filter(disciplina_id=disciplina_id)
-            return queryset
+            return queryset 
             
         return Falta.objects.none()
+# --- FIM DA NOVA VIEWSET ---
 
-    def get_permissions(self):
-        # Só Professor ou Coordenação pode criar/deletar
-        if self.action in ['create', 'update', 'partial_update', 'destroy', 'lancar_frequencia']:
-            permission_classes = [IsAuthenticated, (IsProfessor | IsCoordenacao)]
-        else: # list, retrieve
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
-
-    @action(detail=False, methods=['post'], url_path='lancar')
-    @transaction.atomic
-    def lancar_frequencia(self, request):
-        """
-        Lança a frequência (faltas) para uma disciplina em uma data específica.
-        Limpa registros antigos (Falta/Presenca) desse dia e cria os novos.
-        Recebe: { disciplina_id: int, data: "YYYY-MM-DD", alunos_ausentes_ids: [int] }
-        """
-        data = request.data.get('data')
-        disciplina_id = request.data.get('disciplina_id')
-        alunos_ausentes_ids = request.data.get('alunos_ausentes_ids', [])
-
-        if not data or not disciplina_id:
-            return Response({"erro": "Data e ID da Disciplina são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            disciplina = Disciplina.objects.get(id=disciplina_id)
-        except Disciplina.DoesNotExist:
-            return Response({"erro": "Disciplina não encontrada."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Verifica permissão (professor da disciplina ou admin)
-        user = request.user
-        is_admin = user.cargo in ['administrador', 'coordenador', 'diretor', 'ti']
-        # .all() é necessário para M2M
-        is_professor_da_disciplina = user in disciplina.professores.all() 
-
-        if not (is_admin or is_professor_da_disciplina):
-            return Response({"erro": "Você não tem permissão para lançar faltas nesta disciplina."}, status=status.HTTP_403_FORBIDDEN)
-
-        # Pega todos os alunos da turma desta disciplina
-        alunos_da_turma_ids = Aluno.objects.filter(
-            turma=disciplina.turma, status='ativo'
-        ).values_list('id', flat=True)
-
-        # 1. Deleta todas as faltas E presenças (para evitar inconsistência) 
-        #    destes alunos, nesta data, nesta disciplina
-        Falta.objects.filter(
-            disciplina=disciplina,
-            data=data,
-            aluno_id__in=alunos_da_turma_ids
-        ).delete()
-        
-        Presenca.objects.filter(
-            disciplina=disciplina,
-            data=data,
-            aluno_id__in=alunos_da_turma_ids
-        ).delete()
-
-        # 2. Cria as novas faltas
-        novas_faltas = [
-            Falta(aluno_id=aluno_id, disciplina=disciplina, data=data, justificada=False)
-            for aluno_id in alunos_ausentes_ids
-        ]
-        Falta.objects.bulk_create(novas_faltas)
-        
-        # 3. Cria as presenças para os demais
-        alunos_presentes_ids = [id for id in alunos_da_turma_ids if id not in alunos_ausentes_ids]
-        novas_presencas = [
-            Presenca(aluno_id=aluno_id, disciplina=disciplina, data=data)
-            for aluno_id in alunos_presentes_ids
-        ]
-        Presenca.objects.bulk_create(novas_presencas)
-
-        return Response(
-            {"sucesso": f"{len(novas_faltas)} faltas e {len(novas_presencas)} presenças registradas."}, 
-            status=status.HTTP_201_CREATED
-        )
 
 # ===================================================================
 # VIEWS DE FUNÇÃO (API)
@@ -403,13 +321,7 @@ def relatorio_desempenho_aluno(request, aluno_id):
         if not (hasattr(request.user, 'aluno_profile') and request.user.aluno_profile.id == aluno.id):
             return Response({'erro': 'Acesso negado. Alunos só podem ver o próprio relatório.'}, status=status.HTTP_403_FORBIDDEN)
     
-    elif user_cargo == 'professor':
-        disciplinas_professor = Disciplina.objects.filter(professores=request.user)
-        turmas_professor = Turma.objects.filter(disciplinas__in=disciplinas_professor).distinct()
-        if aluno.turma not in turmas_professor:
-             return Response({'erro': 'Você não tem permissão para ver relatórios desta turma.'}, status=status.HTTP_403_FORBIDDEN)
-    
-    elif user_cargo not in admin_roles:
+    elif user_cargo not in admin_roles and user_cargo != 'professor':
          return Response({'erro': 'Você não tem permissão para ver este relatório.'}, status=status.HTTP_403_FORBIDDEN)
 
     notas = Nota.objects.filter(aluno=aluno)
@@ -418,7 +330,7 @@ def relatorio_desempenho_aluno(request, aluno_id):
 
     medias_disciplinas = notas.values('disciplina__materia__nome').annotate(
         media=Avg('valor')
-    ).order_by('disciplina__materia__nome')
+    )
 
     context = {
         'aluno': {
@@ -429,7 +341,7 @@ def relatorio_desempenho_aluno(request, aluno_id):
             },
             'status': aluno.get_status_display()
         },
-        'medias_disciplinas': [{'disciplina__nome': item['disciplina__materia__nome'], 'media': item['media']} for item in medias_disciplinas], 
+        'medias_disciplinas': list(medias_disciplinas), 
         'faltas': {
             'count': faltas.count()
         },
@@ -488,7 +400,6 @@ def relatorio_gerencial(request):
 @permission_classes([IsAuthenticated])
 def calendario_academico(request):
     eventos = EventoAcademico.objects.all()
-    # (Adicionar filtro por turma/disciplina do usuário logado)
 
     eventos_formatados = []
     for evento in eventos:
@@ -545,8 +456,25 @@ def download_boletim_pdf(request, aluno_id):
 
     context = {
         'aluno': aluno,
-        'notas_disciplinas': notas_disciplinas, 
-eption as e:
+        'notas_disciplinas': notas_disciplinas, # Atualizado para incluir bimestre
+        'total_faltas': total_faltas,
+        'advertencias': advertencias,
+        'suspensoes': suspensoes,
+    }
+
+    html_string = render_to_string('pedagogico/boletim_pdf.html', context)
+
+    try:
+        html = weasyprint.HTML(string=html_string)
+        pdf = html.write_pdf()
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"boletim_{aluno.usuario.username}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
         return HttpResponse(f"Erro ao gerar o PDF: {e}", status=500)
 
 @api_view(['GET'])
