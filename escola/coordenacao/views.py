@@ -1,14 +1,33 @@
-# Em: escola/coordenacao/views.py
-from rest_framework import viewsets, permissions
-from .models import MaterialDidatico, SalaLaboratorio, ReservaSala
-from .serializers import MaterialDidaticoSerializer, SalaLaboratorioSerializer, ReservaSalaSerializer
-from escola.base.permissions import IsCoordenacao # <-- IMPORTAÇÃO NECESSÁRIA
+from django.shortcuts import render, get_object_or_404
+# --- CORREÇÃO AQUI ---
+from escola.pedagogico.models import EventoAcademico # O nome correto é EventoAcademico
+from .models import MaterialDidatico, Colaborador, SalaLaboratorio 
+# --- FIM DA CORREÇÃO ---
+
+def lista_salas(request):
+    salas = SalaLaboratorio.objects.all()
+    return render(request, 'coordenacao/lista_salas.html', {'salas': salas})
+
+def detalhe_sala(request, sala_id):
+    sala = get_object_or_404(SalaLaboratorio, id=sala_id)
+    return render(request, 'coordenacao/detalhe_sala.html', {'sala': sala})
+
+def lista_eventos(request):
+    eventos = EventoAcademico.objects.all() # O nome da variável aqui não importa
+    return render(request, 'coordenacao/lista_eventos.html', {'eventos': eventos})
+
+def lista_materiais(request):
+    materiais = MaterialDidatico.objects.all()
+    return render(request, 'coordenacao/lista_materiais.html', {'materiais': materiais})
+
+def lista_colaboradores(request):
+    colaboradores = Colaborador.objects.all()
+    return render(request, 'coordenacao/lista_colaboradores.html', {'colaboradores': colaboradores})
 
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
-# Esta view customizada de login já existia e deve ser mantida
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
@@ -21,53 +40,3 @@ class CustomAuthToken(ObtainAuthToken):
             'user_id': user.pk,
             'email': user.email
         })
-
-# --- VIEWSETS ATUALIZADAS COM PERMISSÕES CORRETAS ---
-
-class MaterialDidaticoViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciar Materiais Didáticos.
-    """
-    queryset = MaterialDidatico.objects.all()
-    serializer_class = MaterialDidaticoSerializer
-    
-    def get_permissions(self):
-        # Apenas Coordenacao pode editar/criar/deletar
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [permissions.IsAuthenticated, IsCoordenacao]
-        # Todos logados podem ver
-        else:
-            permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
-
-class SalaLaboratorioViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciar Salas e Laboratórios.
-    """
-    queryset = SalaLaboratorio.objects.all()
-    serializer_class = SalaLaboratorioSerializer
-
-    def get_permissions(self):
-        # Apenas Coordenacao pode editar/criar/deletar
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [permissions.IsAuthenticated, IsCoordenacao]
-        # Todos logados podem ver
-        else:
-            permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
-
-class ReservaSalaViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciar Reservas de Salas.
-    """
-    queryset = ReservaSala.objects.all()
-    serializer_class = ReservaSalaSerializer
-    
-    def get_permissions(self):
-        # Apenas Coordenacao pode deletar uma reserva
-        if self.action in ['destroy']:
-            permission_classes = [permissions.IsAuthenticated, IsCoordenacao]
-        # Todos logados (professores) podem criar/listar/ver
-        else:
-            permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]

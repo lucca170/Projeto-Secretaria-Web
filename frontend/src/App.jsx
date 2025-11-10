@@ -1,5 +1,4 @@
-// Em: frontend/src/App.jsx (ARQUIVO MODIFICADO)
-
+// Em: frontend/src/App.jsx
 import React, { useState, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -25,9 +24,6 @@ import ListaLivros from './pages/ListaLivros';
 import MeusEmprestimos from './pages/MeusEmprestimos';
 import AdicionarLivro from './pages/AdicionarLivro'; 
 import EditarLivro from './pages/EditarLivro';     
-
-// --- 1. IMPORTE A NOVA PÁGINA ---
-import LancarFrequencia from './pages/LancarFrequencia';
 
 // --- IMPORTS REMOVIDOS (ESTA É A CORREÇÃO) ---
 // import LancarNotas from './pages/LancarNotas'; 
@@ -61,6 +57,7 @@ function App() {
                 borderRadius: '20px', 
                 textTransform: 'none', 
               },
+              // Correção do botão branco
             } 
           },
           MuiAppBar: { styleOverrides: { root: { backgroundColor: '#207ed6ff', boxShadow: 'none', } } },
@@ -95,8 +92,10 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
+          {/* Rota de Login */}
           <Route path="/login" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLoginSuccess={handleLoginSuccess} />} />
 
+          {/* Rotas dentro do Layout */}
           <Route
             path="/"
             element={isLoggedIn ? <Layout toggleTheme={toggleTheme} onLogout={handleLogout} /> : <Navigate to="/login" />}
@@ -104,27 +103,29 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             
+            {/* Rotas de Alunos e Turmas */}
             <Route path="alunos" element={<Alunos />} />
             <Route path="alunos/adicionar" element={<AdicionarAluno />} />
             <Route path="turmas" element={<ListaTurmas />} />
             <Route path="turmas/:turmaId" element={<DetalheTurma />} />
             <Route path="turmas/adicionar" element={<AdicionarTurma />} />
-            
-            {/* --- 2. ADICIONE A ROTA DA FREQUÊNCIA --- */}
-            <Route path="turmas/:turmaId/frequencia" element={<LancarFrequencia />} />
 
+            {/* Rotas de Calendário */}
             <Route path="calendario" element={<CalendarioAcademico />} />
             <Route path="calendario/adicionar" element={<AdicionarEvento />} />
             <Route path="calendario/evento/:eventoId" element={<DetalheEvento />} />
             
+            {/* Rotas da Biblioteca */}
             <Route path="biblioteca" element={<ListaLivros />} />
             <Route path="biblioteca/meus-emprestimos" element={<MeusEmprestimos />} />
             <Route path="biblioteca/adicionar-livro" element={<AdicionarLivro />} />
             <Route path="biblioteca/livro/:livroId" element={<EditarLivro />} /> 
 
+            {/* Rota de Relatório */}
             <Route path="relatorio/aluno/:alunoId" element={<RelatorioAluno />} />
           </Route>
 
+          {/* Rota para "não encontrado" */}
           <Route path="*" element={<div>Página não encontrada</div>} />
         </Routes>
       </BrowserRouter>
