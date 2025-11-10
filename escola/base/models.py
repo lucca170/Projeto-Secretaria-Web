@@ -16,9 +16,13 @@ CARGO_CHOICES = [
 ]
 
 class Usuario(AbstractUser):  
+    
+    # --- CAMPO DE E-MAIL MODIFICADO ---
+    # Tornamos o e-mail obrigatório (blank=False) e único
+    email = models.EmailField(unique=True, blank=False)
+    
     cargo = models.CharField(max_length=50, choices=CARGO_CHOICES)
 
-    # Diz ao 'createsuperuser' para pedir o email e o cargo.
     REQUIRED_FIELDS = ['email', 'cargo']
 
     def __str__(self):
