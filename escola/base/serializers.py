@@ -1,14 +1,26 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model # <-- MUDANÇA AQUI
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.serializers import AuthTokenSerializer # <-- Importação necessária
 
-User = get_user_model() # <-- MUDANÇA AQUI
+User = get_user_model()
+
+# --- CLASSE QUE FALTAVA ---
+class CustomAuthTokenSerializer(AuthTokenSerializer):
+    """
+    Serializer customizado para o login. 
+    O AuthTokenSerializer padrão já usa 'username' e 'password',
+    que é o que precisamos (o 'username' é o CPF).
+    """
+    # Não precisamos de código extra aqui, só da definição da classe.
+    pass
+# --- FIM DA CLASSE QUE FALTAVA ---
+
 
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer para o modelo de Usuário customizado.
     """
     
-    # Adiciona o ID do aluno ao serializer do usuário, se existir
     aluno_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -20,22 +32,19 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name', 
             'email', 
             'cargo',
-            'aluno_id', # <-- Campo customizado
-            'password'  # Apenas para escrita (criação)
+            'aluno_id',
+            'password'
         ]
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
     def get_aluno_id(self, obj):
-        # 'obj' é a instância de User
-        # Tenta acessar o 'aluno_profile' relacionado
         if hasattr(obj, 'aluno_profile'):
             return obj.aluno_profile.id
-        return None # Retorna None se não for aluno
+        return None
 
     def create(self, validated_data):
-        # Cria um novo usuário com senha hash
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
