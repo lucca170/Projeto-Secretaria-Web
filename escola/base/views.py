@@ -1,20 +1,30 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate, get_user_model # <-- MUDANÇA AQUI
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
-# --- CORREÇÃO DE IMPORTS ---
-from .models import Usuario 
-from escola.coordenacao.models import SalaLaboratorio # Modelo movido para coordenacao
-from escola.pedagogico.models import Disciplina, Nota, Aluno # Modelos agora em pedagogico
-# --- FIM DA CORREÇÃO ---
+from django.views.generic import ListView
+from django.urls import reverse_lazy
+from django.db.models import Count, Avg
+from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
-from django.http import HttpResponse
 
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from .serializers import CustomAuthTokenSerializer 
+from .serializers import CustomAuthTokenSerializer, UserSerializer
+# from .models import User  <-- MUDANÇA AQUI (LINHA REMOVIDA)
+from .forms import CustomUserCreationForm
+from .permissions import IsCoordenacao
 
+User = get_user_model() # <-- MUDANÇA AQUI (LINHA ADICIONADA)
+
+# --- Views base (HTML) ---
+
+def home(request):
+    return render(request, 'base/base.html')
 
 def registrar(request):
     if request.method == 'POST':
@@ -22,124 +32,65 @@ def registrar(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')
+            return redirect('home')  # Redirecionar para a home
     else:
         form = CustomUserCreationForm()
     return render(request, 'base/registrar.html', {'form': form})
 
-def fazer_login(request):
-    if request.method == 'POST':
-        form = CustomAuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('home')
-    else:
-        form = CustomAuthenticationForm()
-    return render(request, 'registration/login.html', {'form': form})
+# --- Viewsets da API ---
 
-def fazer_logout(request):
-    logout(request)
-    return redirect('home')
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint para Usuários.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsCoordenacao] # Apenas Coordenacao pode ver/editar
 
-@login_required
-def home(request):
-    if request.user.cargo == 'aluno':
-        try:
-            # --- CORREÇÃO ---
-            # O 'aluno_profile' é a ligação correta entre Usuario e Aluno
-            aluno_model = request.user.aluno_profile
-            notas = Nota.objects.filter(aluno=aluno_model)
-            context = {
-                'aluno': aluno_model,
-                'notas': notas,
-            }
-        except Aluno.DoesNotExist:
-            context = {
-                'aluno': request.user,
-                'notas': [],
-            }
-        return render(request, 'base/boletim_aluno.html', context)
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """
+        Retorna os dados do usuário logado.
+        """
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+
+# --- Views de API (Funções) ---
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsCoordenacao])
+def dashboard_data(request):
+    """
+    Coleta dados para o dashboard da coordenação.
+    """
+    total_alunos = User.objects.filter(cargo='aluno').count()
+    total_professores = User.objects.filter(cargo='professor').count()
+    total_turmas = 0 # Substitua por: Turma.objects.count()
     
-    elif request.user.cargo == 'professor':
-        alunos = Aluno.objects.all()
-        return render(request, 'base/lista_alunos_para_boletim.html', {'alunos': alunos})
-        
-    elif request.user.cargo == 'administrador':
-        return render(request, 'base/base.html')
-        
-    else:
-        return render(request, 'base/base.html')
-
-@login_required
-def lista_salas(request):
-    salas = SalaLaboratorio.objects.all()
-    return render(request, 'base/lista_salas.html', {'salas': salas})
-
-@login_required
-def detalhe_sala(request, sala_id):
-    sala = get_object_or_404(SalaLaboratorio, id=sala_id)
-    alunos = []
-    return render(request, 'base/detalhe_sala.html', {'sala': sala, 'alunos': alunos})
-
-@login_required
-def lista_disciplinas(request):
-    disciplinas = Disciplina.objects.all()
-    return render(request, 'base/lista_disciplinas.html', {'disciplinas': disciplinas})
-
-@login_required
-def lista_alunos_para_boletim(request):
-    if request.user.cargo not in ['professor', 'administrador', 'coordenador', 'diretor', 'ti']:
-        return redirect('home')
-        
-    alunos = Aluno.objects.all()
-    return render(request, 'base/lista_alunos_para_boletim.html', {'alunos': alunos})
-
-@login_required
-def boletim_aluno(request, aluno_id):
-    admin_roles = ['professor', 'administrador', 'coordenador', 'diretor', 'ti']
+    # Exemplo de dados de evasão (simplificado)
+    evasao_percentual = 0 # Calcule com base nos Alunos
     
-    if request.user.cargo in admin_roles:
-        aluno = get_object_or_404(Aluno, id=aluno_id)
-    
-    elif request.user.cargo == 'aluno':
-        # --- MELHORIA DE SEGURANÇA ---
-        # Garante que o aluno logado só possa ver o próprio boletim
-        aluno = get_object_or_404(Aluno, id=aluno_id, usuario=request.user)
-        # --- FIM DA MELHORIA ---
-    else:
-        return redirect('home')
+    # Exemplo de média geral (simplificado)
+    media_geral_escola = 0 # Calcule com base nas Notas
 
-    notas = Nota.objects.filter(aluno=aluno)
-    context = {
-        'aluno': aluno,
-        'notas': notas,
+    data = {
+        'total_alunos': total_alunos,
+        'total_professores': total_professores,
+        'total_turmas': total_turmas,
+        'evasao_percentual': evasao_percentual,
+        'media_geral_escola': media_geral_escola,
     }
-    return render(request, 'base/boletim_aluno.html', context)
+    return Response(data)
 
-# ... (o restante das views de template podem ser removidas se a API for usada) ...
-@login_required
-def lista_materiais(request):
-    return render(request, 'base/lista_materiais.html', {})
+# --- Autenticação ---
 
-@login_required
-def lista_emprestimos(request):
-    return render(request, 'base/lista_emprestimos.html', {})
-
-@login_required
-def lista_mensalidades(request):
-    return render(request, 'base/lista_mensalidades.html', {})
-
-@login_required
-def lista_colaboradores(request):
-    return render(request, 'base/lista_colaboradores.html', {})
-
-
-# --- VIEW DE LOGIN DA API ---
-class CustomLoginView(ObtainAuthToken):
+class CustomAuthToken(ObtainAuthToken):
+    """
+    View de login customizada.
+    Recebe 'username' (CPF) e 'password'.
+    Retorna o token e os dados do usuário.
+    """
     serializer_class = CustomAuthTokenSerializer
 
     def post(self, request, *args, **kwargs):
@@ -147,8 +98,12 @@ class CustomLoginView(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
-        
+
+        # Serializa os dados do usuário para incluir na resposta
+        user_data = UserSerializer(user).data
+
         return Response({
             'token': token.key,
-            'user': serializer.validated_data['user_data']
+            # Correção do KeyError (já estava da outra vez, mas mantida)
+            'user': user_data 
         })
