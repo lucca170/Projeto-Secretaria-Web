@@ -1,0 +1,30 @@
+/* Em: frontend/src/components/Layout.css */
+
+/* Estiliza a barra de rolagem para navegadores WebKit (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Largura da barra */
+}
+
+/* Estiliza o "trilho" da barra de rolagem */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1); /* Fundo sutil */
+  border-radius: 10px;
+}
+
+/* Estiliza o "polegar" (a parte móvel) */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.4); /* Cor do polegar */
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0);
+}
+
+/* Estiliza o "polegar" ao passar o mouse */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Para Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin; /* "thin" ou "auto" */
+  scrollbar-color: rgba(255, 255, 255, 0.4) rgba(0, 0, 0, 0.1); /* polegar e trilho */
+}
