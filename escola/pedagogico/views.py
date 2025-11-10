@@ -546,24 +546,7 @@ def download_boletim_pdf(request, aluno_id):
     context = {
         'aluno': aluno,
         'notas_disciplinas': notas_disciplinas, 
-        'total_faltas': total_faltas,
-        'advertencias': advertencias,
-        'suspensoes': suspensoes,
-    }
-
-    html_string = render_to_string('pedagogico/boletim_pdf.html', context)
-
-    try:
-        html = weasyprint.HTML(string=html_string)
-        pdf = html.write_pdf()
-
-        response = HttpResponse(pdf, content_type='application/pdf')
-        filename = f"boletim_{aluno.usuario.username}.pdf"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        
-        return response
-        
-    except Exception as e:
+eption as e:
         return HttpResponse(f"Erro ao gerar o PDF: {e}", status=500)
 
 @api_view(['GET'])

@@ -60,6 +60,7 @@ class FaltaAdmin(admin.ModelAdmin):
     search_fields = ('aluno__usuario__username', 'disciplina__materia__nome') # Busca no nome da matéria
     list_filter = ('data', 'justificada', 'disciplina__materia') # Filtra pela matéria
 
+# ... (Resto dos Admins sem alterações)
 @admin.register(EmprestimoMaterial)
 class EmprestimoMaterialAdmin(admin.ModelAdmin):
     list_display = ('material', 'aluno', 'data_emprestimo', 'data_devolucao')

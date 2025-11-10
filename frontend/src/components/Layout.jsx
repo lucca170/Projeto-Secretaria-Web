@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Box, Button, Link as MuiLink } from '@mui/material';
 
+// --- FUNÇÃO getUserData ATUALIZADA (MAIS SEGURA) ---
 const getUserData = () => {
   try {
     const userDataString = localStorage.getItem('userData');
     if (!userDataString || userDataString === "null") {
       return null;
     }
-    return JSON.parse(userDataString); 
+    return JSON.parse(userDataString); // Retorna o objeto { id, role, ... }
   } catch (e) { 
     console.error("Erro ao parsear userData:", e);
     return null; 
@@ -19,6 +20,7 @@ const getUserData = () => {
 function Layout({ toggleTheme, onLogout }) {
   const location = useLocation();
   const navigate = useNavigate();
+  // --- MODIFICADO: Define o estado inicial lendo de forma segura ---
   const [userData, setUserData] = useState(() => getUserData()); 
 
   const handleLogoutClick = () => {
@@ -26,20 +28,19 @@ function Layout({ toggleTheme, onLogout }) {
     navigate('/login');
   };
   
+  // Determina quais links mostrar
   const getNavLinks = () => {
+    // Pega o cargo do estado
     const role = userData ? userData.role : null;
     
     // --- Links Padrão (Admin/Coord) ---
     const adminLinks = [
       { label: 'Dashboard', path: '/dashboard' },
+      // { label: 'Usuários', path: '/usuarios' }, // Removido
       { label: 'Alunos', path: '/alunos' },
       { label: 'Turmas', path: '/turmas' },
       { label: 'Calendário', path: '/calendario' },
       { label: 'Biblioteca', path: '/biblioteca' },
-      // --- LINKS NOVOS ---
-      { label: 'Salas', path: '/salas' },
-      { label: 'Materiais', path: '/materiais' },
-      { label: 'Relatórios', path: '/relatorios' },
     ];
     
     // --- Links de Professor ---
@@ -47,11 +48,9 @@ function Layout({ toggleTheme, onLogout }) {
       { label: 'Dashboard', path: '/dashboard' },
       { label: 'Minhas Turmas', path: '/turmas' }, 
       { label: 'Calendário', path: '/calendario' },
-      // --- LINK NOVO ---
-      { label: 'Minha Agenda', path: '/agenda' },
     ];
     
-    // --- Links de Aluno (Sem alteração) ---
+    // --- Links de Aluno (AGORA SEGURO) ---
     const alunoLinks = [
       { label: 'Dashboard', path: '/dashboard' },
       { label: 'Meu Boletim', path: `/relatorio/aluno/${userData ? userData.id : ''}` }, 
@@ -101,6 +100,7 @@ function Layout({ toggleTheme, onLogout }) {
                 component={RouterLink}
                 to={item.path}
                 color="inherit"
+                // Correção de Highlight
                 underline={location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path)) ? 'always' : 'hover'}
                 sx={{ fontWeight: location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path)) ? 'bold' : 'normal' }}
               >
