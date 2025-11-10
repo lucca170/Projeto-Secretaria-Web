@@ -1,15 +1,18 @@
-from django.urls import path
-from .views import CustomAuthToken 
-from .views import (
-    lista_salas, detalhe_sala, lista_eventos,
-    lista_materiais, lista_colaboradores
-)
+# Em: escola/coordenacao/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import CustomAuthToken, MaterialDidaticoViewSet, SalaLaboratorioViewSet, ReservaSalaViewSet
+
+# Cria o roteador
+router = DefaultRouter()
+router.register(r'materiais', MaterialDidaticoViewSet, basename='material')
+router.register(r'salas', SalaLaboratorioViewSet, basename='sala')
+router.register(r'reservas', ReservaSalaViewSet, basename='reserva')
 
 urlpatterns = [
-    path('salas/', lista_salas, name='lista_salas'),
-    path('salas/<int:sala_id>/', detalhe_sala, name='detalhe_sala'),
-    path('eventos/', lista_eventos, name='lista_eventos'),
-    path('material/', lista_materiais, name='lista_materiais'),
-    path('colaboradores/', lista_colaboradores, name='lista_colaboradores'),
+    # Mantém a view de login antiga (se ainda for usada)
     path('api-token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),
+    
+    # Adiciona as rotas da API
+    path('api/', include(router.urls)),
 ]

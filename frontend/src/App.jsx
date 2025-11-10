@@ -19,17 +19,18 @@ import DetalheTurma from './pages/DetalheTurma';
 import AdicionarTurma from './pages/AdicionarTurma';
 import AdicionarAluno from './pages/AdicionarAluno';
 
-// --- IMPORTS DA BIBLIOTECA ---
+// Imports da Biblioteca
 import ListaLivros from './pages/ListaLivros';
 import MeusEmprestimos from './pages/MeusEmprestimos';
 import AdicionarLivro from './pages/AdicionarLivro'; 
 import EditarLivro from './pages/EditarLivro';     
 
-// --- IMPORTS REMOVIDOS (ESTA É A CORREÇÃO) ---
-// import LancarNotas from './pages/LancarNotas'; 
-// import Usuarios from './pages/Usuarios';
-// import AdicionarUsuario from './pages/AdicionarUsuario';
-// --- FIM DA REMOÇÃO ---
+// --- NOVOS IMPORTS ---
+import RelatoriosGerenciais from './pages/RelatoriosGerenciais';
+import AgendaProfessor from './pages/AgendaProfessor';
+import GerenciarMateriais from './pages/GerenciarMateriais';
+import GerenciarSalas from './pages/GerenciarSalas';
+// --- FIM NOVOS IMPORTS ---
 
 
 function App() {
@@ -57,7 +58,6 @@ function App() {
                 borderRadius: '20px', 
                 textTransform: 'none', 
               },
-              // Correção do botão branco
             } 
           },
           MuiAppBar: { styleOverrides: { root: { backgroundColor: '#207ed6ff', boxShadow: 'none', } } },
@@ -121,8 +121,16 @@ function App() {
             <Route path="biblioteca/adicionar-livro" element={<AdicionarLivro />} />
             <Route path="biblioteca/livro/:livroId" element={<EditarLivro />} /> 
 
-            {/* Rota de Relatório */}
+            {/* Rota de Relatório Individual */}
             <Route path="relatorio/aluno/:alunoId" element={<RelatorioAluno />} />
+            
+            {/* --- NOVAS ROTAS --- */}
+            <Route path="relatorios" element={<RelatoriosGerenciais />} />
+            <Route path="agenda" element={<AgendaProfessor />} />
+            <Route path="materiais" element={<GerenciarMateriais />} />
+            <Route path="salas" element={<GerenciarSalas />} />
+            {/* --- FIM NOVAS ROTAS --- */}
+
           </Route>
 
           {/* Rota para "não encontrado" */}
