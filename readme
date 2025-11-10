@@ -1,0 +1,101 @@
+---Projeto Secretaria Web (Sistema de Gestão Escolar)---
+
+O que é?
+O Secretaria Web é um sistema de gerenciamento escolar full-stack. O projeto simula um portal onde diferentes tipos de usuários (administradores, professores, alunos) podem interagir com dados acadêmicos.
+
+O Backend é construído com Python utilizando Django e Django REST Framework (DRF). Ele fornece uma API RESTful completa para autenticação de usuários (baseada em Token) e para operações de CRUD (Criar, Ler, Atualizar, Deletar) em alunos, turmas, notas, eventos de calendário e mais.
+
+O Frontend é uma moderna Single Page Application (SPA) construída com React, Vite e Material-UI (MUI). Ele consome a API do Django para fornecer uma interface de usuário interativa e responsiva para gerenciar o sistema.
+
+#---Principais Funcionalidades---#
+
+Gestão de Usuários: Sistema de login/logout com autenticação baseada em token.
+
+Controle de Permissão: API com permissões customizadas (ex: Apenas Coordenadores podem criar turmas, apenas Professores podem lançar notas).
+
+Gestão Pedagógica:
+
+CRUD de Alunos e Turmas.
+
+Visualização de relatórios de desempenho por aluno.
+
+Lançamento e visualização de Notas.
+
+Calendário Acadêmico: Visualização de eventos (provas, feriados, trabalhos) em um calendário interativo (FullCalendar).
+
+Eventos Extracurriculares: Alunos podem se inscrever ou cancelar inscrição em eventos com vagas limitadas.
+
+#---Tecnologias Utilizadas---#
+
+Backend (Pasta: /escola)
+
+Python
+
+Django & Django REST Framework
+
+CORS Headers (para comunicação com o frontend)
+
+SQLite (banco de dados padrão de desenvolvimento)
+
+Frontend (Pasta: /frontend)
+
+React 18
+
+Vite (Build tool)
+
+React Router (Rotas)
+
+Axios (Requisições à API)
+
+Material-UI (MUI) (Componentes de UI)
+
+FullCalendar (Visualização do Calendário)
+
+Como Rodar (Início Rápido)
+Siga os 5 passos abaixo para rodar o projeto localmente.
+
+1. Clone o Repositório
+Bash
+
+git clone https://github.com/SEU-USUARIO/projeto-secretaria-web.git
+cd projeto-secretaria-web
+2. Configure e Rode o Backend (Terminal 1)
+Bash
+
+# 1. Navegue até a pasta do backend
+cd escola/
+
+# 2. (Recomendado) Crie e ative um ambiente virtual
+python -m venv venv
+source venv/bin/activate  # (No Windows: .\venv\Scripts\activate)
+
+# 3. Instale as dependências
+pip install django djangorestframework django-cors-headers
+
+# 4. Aplique as migrações do banco de dados
+python manage.py migrate
+
+# 5. Rode o servidor do backend (na porta 8000)
+python manage.py runserver
+3. Configure e Rode o Frontend (Terminal 2)
+Bash
+
+# 1. Navegue até a pasta do frontend (a partir da raiz do projeto)
+cd frontend/
+
+# 2. Instale as dependências
+npm install
+
+# 3. Rode o servidor de desenvolvimento (na porta 5173)
+npm run dev
+4. Acesse o Sistema
+Abra seu navegador e acesse: http://localhost:5173
+
+5. (Opcional) Crie um Superusuário
+Para acessar o painel de admin do Django e criar usuários (professores, coordenadores):
+
+Bash
+
+# No terminal do Backend (Terminal 1)
+python manage.py createsuperuser
+Em seguida, acesse: http://localhost:8000/admin

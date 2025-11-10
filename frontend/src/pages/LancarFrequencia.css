@@ -1,0 +1,18 @@
+/* Em: frontend/src/pages/LancarFrequencia.css (NOVO ARQUIVO) */
+
+.lista-frequencia .MuiListItem-root:nth-of-type(odd) {
+  background-color: #f7f7f7;
+}
+
+/* Modo escuro */
+body[data-mui-color-scheme="dark"] .lista-frequencia .MuiListItem-root:nth-of-type(odd) {
+  background-color: #2c2c2c;
+}
+
+.lista-frequencia .MuiListItem-root:hover {
+  background-color: #e0e0e0;
+}
+
+body[data-mui-color-scheme="dark"] .lista-frequencia .MuiListItem-root:hover {
+  background-color: #424242;
+}

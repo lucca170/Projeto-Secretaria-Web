@@ -1,0 +1,89 @@
+/* Em: frontend/src/pages/Calendario.css */
+
+.calendario-container {
+    padding: 20px;
+    background-color: #f9f9f9; /* Fundo claro */
+    color: #333; /* Cor de texto padrão */
+    max-width: 900px;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para modo escuro (se você usar o ThemeProvider do MUI) */
+body[data-mui-color-scheme="dark"] .calendario-container {
+    background-color: #333;
+    color: #eee;
+}
+body[data-mui-color-scheme="dark"] .fc {
+     background-color: #424242;
+     border-color: #555;
+}
+body[data-mui-color-scheme="dark"] .fc .fc-toolbar-title {
+    color: #eee;
+}
+body[data-mui-color-scheme="dark"] .fc .fc-daygrid-day-number {
+     color: #ccc;
+}
+body[data-mui-color-scheme="dark"] .fc .fc-day-today {
+     background-color: #555 !important;
+}
+body[data-mui-color-scheme="dark"] .fc .fc-event {
+     background-color: #0056b3; /* Mantém um azul escuro */
+     color: white;
+}
+
+
+.calendario-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #007bff; /* Azul primário */
+}
+body[data-mui-color-scheme="dark"] .calendario-container h2 {
+    color: #64b5f6; /* Azul mais claro para tema escuro */
+}
+
+
+/* Ajustes no FullCalendar */
+.fc { 
+    background-color: #fff; 
+    border-radius: 5px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.5em;
+    color: #333;
+}
+
+.fc .fc-button {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    text-transform: capitalize; /* Deixa botões como 'Mês' em vez de 'mês' */
+}
+.fc .fc-button:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #555;
+    text-decoration: none; /* Remove sublinhado dos números */
+}
+
+.fc .fc-day-today { 
+    background-color: #eaf6ff !important; 
+}
+
+.fc .fc-event { 
+    cursor: pointer; 
+    border: none;
+    padding: 3px 5px;
+    font-size: 0.85em;
+    border-radius: 3px;
+    overflow: hidden; /* Evita que texto longo vaze */
+    text-overflow: ellipsis; /* Adiciona "..." se texto for muito longo */
+    white-space: nowrap; /* Impede quebra de linha no título do evento */
+}

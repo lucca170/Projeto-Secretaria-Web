@@ -1,0 +1,15 @@
+/* Estilos globais básicos - Adicione seus estilos aqui depois */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif; /* Usando a fonte que você importou */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Adicione outras resetagens ou estilos base aqui */
